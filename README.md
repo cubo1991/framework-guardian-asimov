@@ -1,60 +1,77 @@
 # Framework Guardian Asimov
 
-Una capa de gobernanza y análisis de riesgos para Claude Code. Analiza
-toda acción con efectos reales antes de ejecutarla, y decide si procede
-sola, si avisa, o si se detiene a pedir confirmación — sin frenar el
-trabajo normal.
+Capa de gobernanza y análisis de riesgos para Claude Code. Analiza toda
+acción con efectos reales antes de ejecutarla, y decide si procede sola,
+si avisa, o si se detiene a pedir confirmación — sin frenar el trabajo
+normal.
 
-No es una skill suelta: es un framework modular de skills + documentos
-que se instala en un proyecto y queda disponible para Claude Code cada
-vez que trabaja ahí.
+Este repositorio es, a la vez, **el marketplace** y **el plugin**: se
+instala directamente en Claude Code con `/plugin install`, sin copiar
+archivos a mano.
 
-## Por qué existe
+## Instalación rápida
 
-Un agente que puede editar código, correr comandos de shell, tocar bases
-de datos y hacer git push tiene mucho poder. Guardian Asimov es la capa
-que se pregunta, antes de cada acción con consecuencias reales: *¿esto
-puede salir mal, para quién, y qué tan grave sería?* — y actúa en
-consecuencia.
-
-## Estructura
+Desde Claude Code, en cualquier proyecto:
 
 ```
-framework-guardian-asimov/
-├── constitution.md          # Filosofía y principios (fuente de verdad)
-├── VERSION
-├── CHANGELOG.md
-├── DESIGN.md                 # Decisiones de diseño y por qué
-├── ROADMAP.md                # Mejoras futuras propuestas
-├── config/
-│   └── profiles.md           # Perfiles Paranoid / Balanced / Expert
-├── skills/
-│   ├── risk-analysis/        # Motor de decisión — el núcleo
-│   ├── filesystem/           # Archivos y carpetas
-│   ├── database/             # Bases de datos
-│   ├── git/                  # Control de versiones
-│   ├── shell/                # Comandos de terminal
-│   ├── security/             # Secretos, credenciales, superficie de ataque
-│   ├── privacy/              # Datos personales y de terceros
-│   ├── legal/                 # Licencias y propiedad intelectual
-│   ├── internet/             # Llamadas de red y servicios externos
-│   └── emergency/            # Qué hacer cuando algo ya salió mal
-└── tests/
-    └── scenarios/            # Casos de prueba: seguros, peligrosos, ambiguos
+/plugin marketplace add <owner>/framework-guardian-asimov
+/plugin install guardian-asimov@guardian-asimov-marketplace
 ```
 
-Cada módulo en `skills/` es independiente: agregar uno nuevo no requiere
-tocar los existentes. Ver `DESIGN.md` para el razonamiento completo de
-esta arquitectura.
+(Reemplazá `<owner>` por tu usuario/organización de GitHub una vez que
+subas este repo.)
 
-## Instalación
+Con eso alcanza — las skills quedan disponibles y Claude Code las
+consulta solo cuando corresponde, según el `description` de cada una.
+Para actualizar a una versión nueva más adelante:
 
-Ver `INSTALL.md`.
+```
+/plugin marketplace update guardian-asimov-marketplace
+```
+
+Ver `INSTALL.md` para el detalle completo, incluyendo la opción de
+instalación manual (sin marketplace) para quien prefiera copiar
+archivos directamente.
+
+## Qué es
+
+Un agente que puede editar código, correr comandos de shell, tocar
+bases de datos y hacer git push tiene mucho poder. Guardian Asimov es
+la capa que se pregunta, antes de cada acción con consecuencias reales:
+*¿esto puede salir mal, para quién, y qué tan grave sería?* — y actúa
+en consecuencia.
+
+## Estructura del repositorio
+
+```
+framework-guardian-asimov/              # raíz del marketplace
+├── .claude-plugin/
+│   └── marketplace.json                # catálogo — lista el plugin de abajo
+└── plugins/
+    └── guardian-asimov/                # el plugin en sí
+        ├── .claude-plugin/
+        │   └── plugin.json             # manifest del plugin
+        ├── constitution.md             # filosofía y principios (fuente de verdad)
+        ├── VERSION / CHANGELOG.md / DESIGN.md / ROADMAP.md
+        ├── config/
+        │   └── profiles.md             # Paranoid / Balanced / Expert
+        ├── skills/
+        │   ├── risk-analysis/          # motor de decisión — el núcleo
+        │   ├── filesystem/  ├── database/  ├── git/  ├── shell/
+        │   ├── security/    ├── privacy/   ├── legal/ ├── internet/
+        │   └── emergency/              # contención post-incidente
+        └── tests/
+            └── scenarios/              # casos seguros, peligrosos, ambiguos
+```
+
+Cada módulo en `skills/` es independiente: agregar uno nuevo no
+requiere tocar los existentes. Ver `plugins/guardian-asimov/DESIGN.md`
+para el razonamiento completo de esta arquitectura.
 
 ## Uso
 
-Ver `USAGE.md` para ejemplos reales de cómo interviene el framework en
-distintos escenarios.
+Ver `plugins/guardian-asimov/USAGE.md` para ejemplos reales de cómo
+interviene el framework en distintos escenarios.
 
 ## Filosofía en una frase
 

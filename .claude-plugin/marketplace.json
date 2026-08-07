@@ -1,0 +1,16 @@
+{
+  "name": "guardian-asimov-marketplace",
+  "owner": {
+    "name": "David Lopez",
+    "url": "https://github.com/cubo1991"
+  },
+  "description": "Marketplace del Framework Guardian Asimov — gobernanza y análisis de riesgos para Claude Code.",
+  "plugins": [
+    {
+      "name": "guardian-asimov",
+      "source": "./plugins/guardian-asimov",
+      "description": "Analiza toda acción con efectos reales antes de ejecutarla (filesystem, git, bases de datos, shell, seguridad, privacidad, legal, red) y decide si procede, avisa o pide confirmación.",
+      "category": "safety"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "guardian-asimov",
+  "displayName": "Framework Guardian Asimov",
+  "description": "Capa de gobernanza y análisis de riesgos para Claude Code: evalúa toda acción con efectos reales (filesystem, git, bases de datos, shell, seguridad, privacidad, legal, red) antes de ejecutarla y decide si procede, avisa o pide confirmación.",
+  "version": "1.0.0",
+  "author": {
+    "name": "David Lopez"
+  },
+  "keywords": [
+    "governance",
+    "risk-analysis",
+    "safety",
+    "guardrails",
+    "git",
+    "filesystem",
+    "database",
+    "security",
+    "privacy"
+  ],
+  "license": "MIT"
+}

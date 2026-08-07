@@ -1,55 +1,115 @@
 # Instalación
 
-## Opción A — Skills de Claude Code (recomendada)
+## Paso 0 — Subir el repo a GitHub
 
-1. Copiar la carpeta `skills/` de este framework a la carpeta de skills
-   de tu proyecto en Claude Code (normalmente `.claude/skills/` dentro
-   del repo, o la carpeta de skills de usuario si querés que aplique a
-   todos tus proyectos).
+Este framework ya está estructurado como un marketplace de Claude Code
+(`.claude-plugin/marketplace.json` en la raíz + el plugin en
+`plugins/guardian-asimov/`). Solo falta subirlo:
 
-   ```
-   cp -r framework-guardian-asimov/skills/* /ruta/a/tu/proyecto/.claude/skills/
-   ```
+```bash
+cd framework-guardian-asimov
+git init
+git add .
+git commit -m "Framework Guardian Asimov v1.0.0"
+git remote add origin https://github.com/<tu-usuario>/framework-guardian-asimov.git
+git push -u origin main
+```
 
-2. Copiar `constitution.md` y `config/profiles.md` a la raíz de
-   `.claude/` del proyecto (o donde tu setup de Claude Code cargue
-   contexto persistente), para que la filosofía general esté siempre
-   disponible aunque no se dispare ningún módulo puntual.
+Puede ser un repo público o privado — ambos funcionan con
+`/plugin marketplace add`.
 
-3. (Opcional pero recomendado) Referenciar la constitución desde tu
-   `CLAUDE.md` del proyecto, agregando una línea como:
+## Opción A — Instalar como plugin (recomendada)
 
-   ```markdown
-   ## Framework Guardian Asimov
-   Este proyecto usa el Framework Guardian Asimov para análisis de riesgo.
-   Ver .claude/constitution.md y .claude/skills/risk-analysis/SKILL.md.
-   Perfil activo: Balanced (ver .claude/config/profiles.md para cambiarlo).
-   ```
+Desde dentro de Claude Code, en cualquier proyecto donde lo quieras
+usar:
 
-4. Listo. Claude Code detecta las skills automáticamente por su
-   `description` en el frontmatter y las consulta cuando una tarea
-   coincide (borrar archivos, git, bases de datos, etc.).
+```
+/plugin marketplace add <tu-usuario>/framework-guardian-asimov
+/plugin install guardian-asimov@guardian-asimov-marketplace
+```
 
-## Opción B — Solo como documento de referencia
+Si el resumen de instalación dice `Run /reload-plugins to activate.`,
+corré ese comando. Listo — las skills quedan disponibles en ese
+proyecto (o para tu usuario, según el `--scope` que uses) y Claude Code
+las consulta automáticamente cuando la tarea coincide con la
+`description` de cada módulo.
 
-Si no querés usar el mecanismo de skills, se puede pegar
-`constitution.md` + `skills/risk-analysis/SKILL.md` directamente en las
-instrucciones de sistema/proyecto de Claude Code. Perdés la carga
-progresiva (todo queda siempre en contexto) pero funciona igual como
-guía de comportamiento.
+### Actualizar a una versión nueva
+
+Cada vez que hagas push de cambios al repo:
+
+```
+/plugin marketplace update guardian-asimov-marketplace
+```
+
+### Instalar para todo tu usuario en vez de un solo proyecto
+
+```
+/plugin marketplace add <tu-usuario>/framework-guardian-asimov --scope user
+/plugin install guardian-asimov@guardian-asimov-marketplace
+```
+
+Con `--scope user` queda disponible en todos tus proyectos de Claude
+Code, no solo en el actual.
+
+### Que tu equipo lo tenga automáticamente
+
+Si trabajás con otras personas en el mismo repo de proyecto (no el del
+framework, sino el proyecto donde lo usan), agregá esto a
+`.claude/settings.json` del proyecto:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "guardian-asimov-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "<tu-usuario>/framework-guardian-asimov"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "guardian-asimov@guardian-asimov-marketplace": true
+  }
+}
+```
+
+Así, cualquiera que abra ese proyecto con Claude Code recibe el
+framework activado automáticamente, sin instalar nada a mano.
+
+## Opción B — Instalación manual (sin marketplace)
+
+Si preferís no usar GitHub o el mecanismo de plugins, se puede seguir
+copiando archivos a mano:
+
+```bash
+git clone https://github.com/<tu-usuario>/framework-guardian-asimov.git
+cp -r framework-guardian-asimov/plugins/guardian-asimov/skills/* .claude/skills/
+cp framework-guardian-asimov/plugins/guardian-asimov/constitution.md .claude/
+cp -r framework-guardian-asimov/plugins/guardian-asimov/config .claude/
+```
+
+Con esta opción no hay auto-update — cada actualización requiere volver
+a clonar y copiar.
 
 ## Verificar que está activo
 
 Pedile a Claude Code algo levemente riesgoso pero no destructivo, por
 ejemplo: *"Borrá la carpeta `dist/`."* — debería avisar brevemente el
 riesgo (🟡/🔴 según el estado del proyecto) en vez de borrar sin decir
-nada. Si no pasa nada de eso, revisar que las skills se hayan copiado a
-la ruta correcta y que el frontmatter (`name`/`description`) esté
-intacto.
+nada. Si no pasa nada de eso:
 
-## Actualizar
+- Confirmá que el plugin quedó instalado: `/plugin list` (o revisá
+  `.claude/settings.json` si usaste la Opción B).
+- Corré `claude plugin validate .` desde la raíz del repo del
+  framework para chequear que `marketplace.json` y `plugin.json` estén
+  bien formados.
 
-Reemplazar la carpeta `skills/` completa por la versión nueva y revisar
-`CHANGELOG.md` para ver qué cambió. `config/profiles.md` conviene
-revisarlo manualmente si tenías un perfil custom, porque un `cp -r` lo
-pisaría.
+## Desinstalar / remover el marketplace
+
+```
+/plugin marketplace remove guardian-asimov-marketplace
+```
+
+Esto también desinstala el plugin. Para solo refrescar sin perder la
+instalación, usá `update` en vez de `remove`.

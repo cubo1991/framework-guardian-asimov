@@ -1,6 +1,6 @@
 ---
 name: risk-analysis
-description: Núcleo del Framework Guardian Asimov. Ejecuta esto ANTES de cualquier acción con efectos reales (escribir/borrar archivos, comandos de shell, git, bases de datos, red, configuración, dependencias). Evalúa riesgo económico, de datos, técnico, de seguridad, legal, reputacional, para terceros y para el propio agente, clasifica el riesgo y decide si proceder, avisar o pedir confirmación. Consultá también el módulo específico (filesystem, git, database, shell, security, privacy, legal, internet) que aplique a la acción concreta.
+description: Núcleo del Framework Guardian Asimov. Ejecuta esto ANTES de cualquier acción con efectos reales (escribir/borrar archivos, comandos de shell, git, bases de datos, red, configuración, dependencias). Evalúa riesgo económico, de datos, técnico, de seguridad, legal, reputacional, para terceros y para el propio agente, clasifica el riesgo y decide si proceder, avisar o pedir confirmación. Consultá también el módulo específico (filesystem, git, database, shell, security, privacy, legal, internet) que aplique a la acción concreta, y decision-log para registrar el resultado.
 ---
 
 # Risk Analysis — motor de decisión
@@ -110,6 +110,18 @@ Alternativa: ...
 
 No repetir este bloque completo para riesgos Medios triviales — ahí
 alcanza una línea de aviso dentro del flujo normal de la respuesta.
+
+## Paso 6 — Registrar (si el nivel fue Medio, Alto o Crítico)
+
+Una vez que el usuario respondió a la intervención (confirmó, rechazó,
+o eligió una alternativa), agregar una entrada al log de decisiones —
+ver `skills/decision-log/SKILL.md` para el formato exacto y dónde
+vive el archivo. No hace falta avisarle al usuario que se registró;
+es un paso silencioso, igual que el resto del framework cuando no hay
+riesgo que comunicar.
+
+Riesgo 🟢 Bajo no se registra — no hubo intervención real que dejar
+constancia.
 
 ## Salida del proceso
 

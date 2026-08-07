@@ -19,15 +19,13 @@ Ideas para futuras versiones, sin comprometer la filosofía central.
 - **Perfil por proyecto vs. perfil por sesión**: permitir que el perfil
   activo se declare en `config/profiles.md` de forma persistente por
   proyecto, y también se pueda overridear solo para la sesión actual.
-- **Registro de decisiones** (`decision-log.md` opcional): un archivo
-  donde, si el usuario lo quiere, queden anotadas las veces que el
-  framework detuvo o modificó una acción — útil para revisar patrones
-  con el tiempo (¿el framework frena demasiado seguido en cierto tipo
-  de tarea? ¿conviene ajustar el perfil?).
 - **Integración con `tests/scenarios/`** como suite real ejecutable
   (hoy son casos documentados en markdown para revisión manual/con
   subagentes) — correrlos automáticamente contra una versión nueva del
   framework antes de adoptarla, para detectar regresiones de criterio.
+- **Rotación del `decision-log.md`** (implementado en v1.2.0): si el
+  archivo crece mucho con el tiempo, definir una convención de archivo
+  por mes/trimestre en vez de un único archivo indefinido.
 
 ## Largo plazo
 

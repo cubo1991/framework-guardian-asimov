@@ -49,6 +49,24 @@ los módulos en `skills/`. Igual, se puede pedir explícitamente:
 > `orders_deprecated` en vez de borrarla, así queda recuperable por un
 > tiempo. ¿Confirmás borrado definitivo, o vamos con el rename?"
 
+## Log de decisiones
+
+Cada intervención 🟡🔴⚫ que el usuario resuelve queda registrada
+automáticamente en `decision-log.md`, en la raíz del proyecto — sin
+que haga falta pedirlo. Para consultarlo:
+
+> Usuario: "Mostrame qué frenó el framework esta semana."
+> Resultado: Claude lee `decision-log.md` y devuelve un resumen — no
+> el archivo entero — por ejemplo: "Hubo 3 intervenciones: 1 Crítica
+> (un `DROP TABLE` que se resolvió con rename en vez de borrado), 2
+> Altas (cambio de proveedor de auth, confirmado; y una migración en
+> producción, confirmada con backup previo). Ninguna quedó rechazada."
+
+Si el archivo todavía no existe (no hubo intervenciones que registrar
+en el proyecto), Claude lo dice directamente en vez de inventar
+contenido. Ver `skills/decision-log/SKILL.md` para el formato exacto
+de cada entrada.
+
 ## Cambiar de perfil
 
 Ver `config/profiles.md`. Se puede pedir en cualquier momento:

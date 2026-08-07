@@ -9,21 +9,58 @@ Este repositorio es, a la vez, **el marketplace** y **el plugin**: se
 instala directamente en Claude Code con `/plugin install`, sin copiar
 archivos a mano.
 
-## Instalación rápida
+## Instalación rápida (por proyecto)
 
-Desde Claude Code, en cualquier proyecto:
+Desde Claude Code, en el proyecto donde lo quieras usar — son **dos
+comandos separados**, cada uno con su propio Enter, no se pegan juntos:
 
 ```
-/plugin marketplace add <owner>/framework-guardian-asimov
+/plugin marketplace add cubo1991/framework-guardian-asimov
+```
+
+Esperá a que confirme que agregó el marketplace, y recién ahí:
+
+```
 /plugin install guardian-asimov@guardian-asimov-marketplace
 ```
 
-(Reemplazá `<owner>` por tu usuario/organización de GitHub una vez que
-subas este repo.)
+Con eso alcanza — las skills quedan disponibles solo en ese proyecto,
+y Claude Code las consulta cuando corresponde, según el `description`
+de cada una.
 
-Con eso alcanza — las skills quedan disponibles y Claude Code las
-consulta solo cuando corresponde, según el `description` de cada una.
-Para actualizar a una versión nueva más adelante:
+## Instalación global (todos tus proyectos)
+
+Si no querés repetir la instalación en cada proyecto, agregá `--scope
+user` al primer comando — así el marketplace queda registrado a nivel
+de tu usuario, no atado a la carpeta donde lo corriste:
+
+```
+/plugin marketplace add cubo1991/framework-guardian-asimov --scope user
+```
+
+Escribilo completo en una sola línea (no lo escribas dentro del cuadro
+interactivo de "Add Marketplace" — ese cuadro solo acepta la fuente
+`owner/repo`, sin flags). Cuando confirme, instalá el plugin igual que
+antes:
+
+```
+/plugin install guardian-asimov@guardian-asimov-marketplace
+```
+
+Al quedar en scope `user`, no hace falta repetir el `marketplace add`
+en cada proyecto nuevo — ya está disponible para vos en cualquiera.
+Para confirmar que quedó global:
+
+```
+/plugin marketplace list --json
+```
+
+Deberías ver `guardian-asimov-marketplace` sin estar atado a una
+carpeta puntual de proyecto.
+
+## Actualizar
+
+Cada vez que se suban cambios nuevos al repo:
 
 ```
 /plugin marketplace update guardian-asimov-marketplace
@@ -41,6 +78,25 @@ la capa que se pregunta, antes de cada acción con consecuencias reales:
 *¿esto puede salir mal, para quién, y qué tan grave sería?* — y actúa
 en consecuencia.
 
+## Dos capas: razonamiento + enforcement técnico
+
+Para la mayoría de las decisiones, Guardian Asimov es una **skill** —
+guía de comportamiento que el modelo interpreta y sigue. Eso funciona
+bien en una sesión normal, con vos presente para responder. Pero una
+skill no es un control técnico: en modo no interactivo (`-p`, sin
+humano disponible), un modelo puede decidir seguir adelante igual.
+
+Por eso, para la lista cerrada de "operaciones críticas" (`rm -rf`,
+`git push --force`, `DROP DATABASE`, etc.), el framework agrega una
+segunda capa: un **hook técnico** (`hooks/hooks.json` +
+`scripts/guardian-gate.sh`) que Claude Code ejecuta automáticamente
+antes de correr cualquier comando de shell, y que fuerza una
+confirmación real a través del sistema de permisos — sin depender de
+que el modelo coopere. En modo desatendido, sin nadie para confirmar,
+la acción queda bloqueada por default.
+
+Ver `constitution.md` (sección 0) para el detalle de esta distinción.
+
 ## Estructura del repositorio
 
 ```
@@ -55,11 +111,16 @@ framework-guardian-asimov/              # raíz del marketplace
         ├── VERSION / CHANGELOG.md / DESIGN.md / ROADMAP.md
         ├── config/
         │   └── profiles.md             # Paranoid / Balanced / Expert
+        ├── hooks/
+        │   └── hooks.json              # registra el hook PreToolUse
+        ├── scripts/
+        │   └── guardian-gate.sh        # enforcement técnico de operaciones críticas
         ├── skills/
         │   ├── risk-analysis/          # motor de decisión — el núcleo
         │   ├── filesystem/  ├── database/  ├── git/  ├── shell/
         │   ├── security/    ├── privacy/   ├── legal/ ├── internet/
-        │   └── emergency/              # contención post-incidente
+        │   ├── emergency/              # contención post-incidente
+        │   └── decision-log/           # historial de intervenciones
         └── tests/
             └── scenarios/              # casos seguros, peligrosos, ambiguos
 ```

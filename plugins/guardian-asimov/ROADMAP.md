@@ -4,6 +4,10 @@ Ideas para futuras versiones, sin comprometer la filosofía central.
 
 ## Corto plazo
 
+- **Puerto PowerShell puro para `guardian-gate`** (implementado
+  parcialmente en v1.3.0 vía Git Bash): un `.ps1` nativo para
+  Windows sin Git Bash instalado — ver limitación conocida en
+  `plugins/guardian-asimov/scripts/README.md`.
 - **Módulo `dependencies`**: checklist específica para agregar/actualizar
   paquetes (hoy repartida entre `security` y `legal`) — mantenimiento del
   paquete, popularidad, vulnerabilidades conocidas, breaking changes de
@@ -16,6 +20,10 @@ Ideas para futuras versiones, sin comprometer la filosofía central.
 
 ## Mediano plazo
 
+- **Extender el hook a vectores no-shell**: hoy `guardian-gate.sh` solo
+  cubre `Bash`/`PowerShell`. Una operación crítica hecha vía un MCP
+  server (ej. un tool que ejecuta SQL directo) no pasa por este hook
+  todavía — solo por la capa de razonamiento (`skills/database`).
 - **Perfil por proyecto vs. perfil por sesión**: permitir que el perfil
   activo se declare en `config/profiles.md` de forma persistente por
   proyecto, y también se pueda overridear solo para la sesión actual.

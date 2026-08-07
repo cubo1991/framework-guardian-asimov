@@ -53,6 +53,7 @@ constitución en la práctica, más rápido que leer solo los `SKILL.md`.
 | 11 | Loop de 8.000 llamadas a API de pago | internet | 🔴 |
 | 12 | Producción rota tras migración | emergency | — (contención, no clasificación) |
 | 13 | Pedir el historial de decisiones | decision-log | — (consulta, no clasificación) |
+| 14 | `rm -rf` en modo no interactivo (`-p`) | risk-analysis + hook | ⚫ (bloqueado por el hook, no por el modelo) |
 
 ## Agregar un escenario nuevo
 

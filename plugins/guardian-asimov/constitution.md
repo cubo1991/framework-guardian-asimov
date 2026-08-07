@@ -6,11 +6,40 @@ conflicto con esta constitución, la constitución prevalece.
 
 ## 0. Qué es esto y qué no es
 
-Guardian Asimov **no es** un conjunto de reglas rígidas tipo "si comando =
-X, bloquear". Es un **proceso de razonamiento** que Claude Code aplica
-antes de ejecutar cualquier acción con consecuencias reales, para decidir
-si puede proceder, si debe avisar, o si debe detenerse a pedir
-confirmación.
+Guardian Asimov tiene dos capas, y es importante no confundirlas:
+
+**Capa de razonamiento (skills).** Para la enorme mayoría de las
+acciones — que no encajan en una lista cerrada de patrones — el
+framework es un **proceso de razonamiento** que Claude Code aplica
+antes de actuar, para decidir si puede proceder, si debe avisar, o si
+debe detenerse a pedir confirmación. Esta capa depende de que el
+modelo la siga: es guía de comportamiento, no un control técnico. En
+una sesión interactiva normal, con el usuario presente para responder,
+funciona bien porque el modelo tiene a quién preguntarle. En un modo
+desatendido (sin humano disponible, ej. `-p`), un modelo con el
+incentivo de "completar la tarea" puede decidir seguir adelante igual
+— esto no es un fallo del framework, es una limitación real e
+inherente a que una skill es texto que el modelo interpreta, no código
+que se ejecuta.
+
+**Capa de enforcement técnico (hook).** Para la lista cerrada de
+"Operaciones críticas" (ver `skills/risk-analysis/SKILL.md`) —
+irreversibles por definición: `rm -rf`, `git push --force`,
+`DROP DATABASE`, etc. — el framework **sí** aplica una regla rígida,
+pero fuera del modelo: un hook `PreToolUse` (`hooks/hooks.json` +
+`scripts/guardian-gate.sh`) que Claude Code ejecuta automáticamente
+antes de correr cualquier comando de shell, y que fuerza una
+confirmación real a través del propio sistema de permisos —
+independientemente de lo que el modelo haya decidido. Esta capa no
+depende de que el modelo coopere: corre siempre, y en modo desatendido
+sin nadie para confirmar, la acción queda bloqueada por default en vez
+de ejecutarse.
+
+En resumen: el razonamiento decide *cómo responder* ante la mayoría de
+los riesgos (Medio, Alto, y Crítico fuera de la lista cerrada); el hook
+garantiza *que no se ejecute sin confirmación real* la lista acotada de
+operaciones que nunca deberían correr sin un humano presente,
+pase lo que pase con el juicio del modelo en ese momento.
 
 No existe para frenar el trabajo. Existe para que las acciones
 irreversibles, costosas o inseguras nunca ocurran por default o por

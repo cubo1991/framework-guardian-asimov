@@ -18,6 +18,27 @@ git push -u origin main
 Puede ser un repo público o privado — ambos funcionan con
 `/plugin marketplace add`.
 
+## Requisito: `jq`
+
+A partir de v1.3.0 el framework incluye un hook técnico
+(`hooks/hooks.json` + `scripts/guardian-gate.sh`) que necesita `jq`
+disponible en el entorno donde corre Claude Code, para bloquear de
+verdad las operaciones críticas (no solo avisar por texto). Si no lo
+tenés:
+
+```bash
+# macOS
+brew install jq
+# Debian/Ubuntu
+sudo apt install jq
+# Windows (con Chocolatey)
+choco install jq
+```
+
+Si `jq` no está instalado, el framework sigue funcionando igual a nivel
+de razonamiento (las skills avisan como siempre), pero pierde la capa
+de enforcement técnico — ver `plugins/guardian-asimov/scripts/README.md`.
+
 ## Opción A — Instalar como plugin (recomendada)
 
 Desde dentro de Claude Code, en cualquier proyecto donde lo quieras
@@ -44,13 +65,29 @@ Cada vez que hagas push de cambios al repo:
 
 ### Instalar para todo tu usuario en vez de un solo proyecto
 
+Escribí el comando **completo, en una sola línea**, en el prompt de
+Claude Code (no lo escribas dentro del cuadro interactivo de
+"Add Marketplace" que aparece al tipear solo `/plugin marketplace add`
+— ese cuadro espera únicamente la fuente `owner/repo`, sin flags ni el
+segundo comando pegado):
+
 ```
 /plugin marketplace add <tu-usuario>/framework-guardian-asimov --scope user
+```
+
+Esperá la confirmación, y recién ahí, en su propio Enter:
+
+```
 /plugin install guardian-asimov@guardian-asimov-marketplace
 ```
 
 Con `--scope user` queda disponible en todos tus proyectos de Claude
-Code, no solo en el actual.
+Code, no solo en el actual — no hace falta repetir el `marketplace add`
+cada vez que abrís un proyecto nuevo. Para confirmarlo:
+
+```
+/plugin marketplace list --json
+```
 
 ### Que tu equipo lo tenga automáticamente
 
@@ -104,6 +141,14 @@ nada. Si no pasa nada de eso:
 - Corré `claude plugin validate .` desde la raíz del repo del
   framework para chequear que `marketplace.json` y `plugin.json` estén
   bien formados.
+
+Para verificar específicamente **la capa de enforcement técnico** (el
+hook, no solo la skill), corré `/hooks` dentro de Claude Code — debería
+listar un `PreToolUse` con matcher `Bash|PowerShell` proveniente de
+"Plugin Hooks". Como prueba real, pedile algo como *"borrá esta carpeta
+con `rm -rf`"* sobre una carpeta de prueba: debería aparecer un pedido
+de permiso real (no solo texto), incluso si en algún momento el modelo
+intentara saltearlo.
 
 ## Desinstalar / remover el marketplace
 

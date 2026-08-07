@@ -3,6 +3,36 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/).
 Versionado semántico.
 
+## [1.3.0] - 2026-08-07
+
+### Agregado
+- **Capa de enforcement técnico**: `hooks/hooks.json` +
+  `scripts/guardian-gate.sh`, un hook `PreToolUse` que intercepta
+  comandos de shell antes de ejecutarse y fuerza confirmación real
+  (`permissionDecision: "ask"`) para la lista de "Operaciones
+  críticas", sin depender de que el modelo decida pedirla.
+- `plugins/guardian-asimov/scripts/README.md`: documentación del hook,
+  requisitos (`jq`), y limitaciones conocidas.
+- Escenario `14-headless-mode-enforcement.md`, que documenta y valida
+  el caso real que motivó este cambio.
+
+### Corregido
+- **Hallazgo real (reportado por el usuario)**: en modo no interactivo
+  (`claude -p`, sin humano disponible para responder), la skill
+  `risk-analysis` por sí sola no bloqueaba una operación crítica
+  (`rm -rf`) — el modelo, sin nadie a quien preguntarle, intentó
+  ejecutarla igual, incluyendo intentos de saltear el sandbox nativo
+  de Claude Code. Solo la protección externa del sandbox evitó el
+  borrado; el framework instalado no había intervenido. Este release
+  agrega la capa de hook que cierra ese hueco: ahora la lista de
+  operaciones críticas queda bloqueada por un control técnico
+  independiente del razonamiento del modelo.
+
+### Cambiado
+- `constitution.md` (sección 0) y `skills/risk-analysis/SKILL.md`:
+  documentan explícitamente el modelo de dos capas (razonamiento vía
+  skills + enforcement técnico vía hook) y sus límites respectivos.
+
 ## [1.2.0] - 2026-08-07
 
 ### Agregado

@@ -95,6 +95,14 @@ Estas siempre pasan por el Paso 4 nivel Crítico, sin excepción de
 perfil — ni siquiera el perfil `expert` las salta (ver
 `config/profiles.md` para el detalle de qué sí varía entre perfiles).
 
+**Esta lista, además, está cubierta por un hook técnico**
+(`hooks/hooks.json` + `scripts/guardian-gate.sh`) que intercepta el
+comando de shell correspondiente antes de que se ejecute y fuerza una
+confirmación real a través del sistema de permisos de Claude Code —
+no depende de que el razonamiento de este módulo se aplique
+correctamente en el momento. Es la red de seguridad para cuando el
+razonamiento solo no alcanza (ver `constitution.md`, sección 0).
+
 ## Formato de intervención
 
 Cuando el framework interviene (Medio, Alto o Crítico), el mensaje debe

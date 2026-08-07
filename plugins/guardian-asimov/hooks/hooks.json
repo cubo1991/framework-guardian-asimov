@@ -1,0 +1,17 @@
+{
+  "description": "Guardian Asimov — capa de enforcement técnico. Antes de correr cualquier comando de shell, chequea si coincide con la lista de 'operaciones críticas' de risk-analysis (rm -rf, git reset --hard, push --force, DROP DATABASE, etc.) y, si coincide, fuerza una confirmación real del usuario a través del sistema de permisos de Claude Code — no depende de que el modelo decida pedirla.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/scripts/guardian-gate.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

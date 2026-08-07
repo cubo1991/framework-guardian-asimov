@@ -1,8 +1,8 @@
 {
   "name": "guardian-asimov",
   "displayName": "Framework Guardian Asimov",
-  "description": "Capa de gobernanza y análisis de riesgos para Claude Code: evalúa toda acción con efectos reales (filesystem, git, bases de datos, shell, seguridad, privacidad, legal, red) antes de ejecutarla y decide si procede, avisa o pide confirmación.",
-  "version": "1.2.0",
+  "description": "Capa de gobernanza y análisis de riesgos para Claude Code: evalúa toda acción con efectos reales (filesystem, git, bases de datos, shell, seguridad, privacidad, legal, red) antes de ejecutarla y decide si procede, avisa o pide confirmación. Incluye un hook técnico que fuerza confirmación real en operaciones críticas, incluso si el modelo decide proceder solo.",
+  "version": "1.3.0",
   "author": {
     "name": "David Lopez"
   },
@@ -16,7 +16,9 @@
     "database",
     "security",
     "privacy",
-    "decision-log"
+    "decision-log",
+    "hooks",
+    "enforcement"
   ],
   "license": "MIT"
 }

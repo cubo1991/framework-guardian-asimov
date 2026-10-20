@@ -1,110 +1,122 @@
 # CHANGELOG
 
-Formato basado en [Keep a Changelog](https://keepachangelog.com/).
-Versionado semántico.
+Format based on [Keep a Changelog](https://keepachangelog.com/).
+Semantic versioning.
+
+## [1.4.0] - 2026-10-20
+
+### Changed
+- **Single skill**: the eleven separate skills were merged into one,
+  `guardian-risk-gate`. `SKILL.md` holds the decision process; domain
+  checklists, profiles and the constitution moved to `references/`;
+  the hook scripts moved to `scripts/` and the scenarios and hook corpus
+  to `evals/`. `hooks/hooks.json` now points to
+  `skills/guardian-risk-gate/scripts/guardian-gate.sh`.
+- **English**: all skill content, scripts, tests and docs were
+  translated to English (the hook's messages included).
+- Corpus categories renamed: `VARIANTE`→`VARIANT`, `CORREGIDO`→`FIXED`,
+  `LIMITE-FN`/`LIMITE-FP`→`LIMIT-FN`/`LIMIT-FP`.
+- Frontmatter follows the Agent Skills spec (`name` = directory name,
+  `compatibility`, `metadata`).
 
 ## [1.3.1] - 2026-10-20
 
-### Corregido
-- **El hook no arrancaba en instalaciones vía marketplace**:
-  `guardian-gate.sh` estaba en git como 100644 (sin bit de ejecución),
-  Claude Code lo invocaba directo y fallaba con "Permission denied"; como
-  ese error no bloquea, los comandos pasaban sin revisión. Ahora
-  `hooks.json` lo invoca con `bash "${CLAUDE_PLUGIN_ROOT}/scripts/guardian-gate.sh"`,
-  el script quedó en 100755 y se agregó `"onFailure": "block"` (Claude
-  Code v2.1.295+) para que un fallo del hook no deje pasar el comando.
-- Sin `jq` el hook ya no deja pasar todo en silencio: pide confirmación.
-- `rm` recursivo+forzado se detecta en cualquier forma y orden (`-fr`,
+### Fixed
+- **The hook did not start in marketplace installs**: `guardian-gate.sh`
+  was stored in git as 100644 (no execute bit), Claude Code invoked it
+  directly and it failed with "Permission denied"; since that error is
+  non-blocking, commands went through unchecked. `hooks.json` now invokes
+  it as `bash "${CLAUDE_PLUGIN_ROOT}/scripts/guardian-gate.sh"`, the
+  script is 100755, and `"onFailure": "block"` was added (Claude Code
+  v2.1.295+) so a hook failure does not let the command through.
+- Without `jq` the hook no longer silently lets everything through: it
+  asks for confirmation.
+- Recursive+forced `rm` is detected in any form and order (`-fr`,
   `-r -f`, `--recursive --force`, `/bin/rm`).
-- `DELETE FROM ... WHERE ...` ya no dispara la confirmación (alineado con
-  la lista de operaciones críticas: solo `DELETE` sin `WHERE`).
-- Nuevos patrones: `git push ... +ref`, `DROP SCHEMA/TABLE`,
+- `DELETE FROM ... WHERE ...` no longer triggers the confirmation
+  (aligned with the critical operations list: only `DELETE` without
+  `WHERE`).
+- New patterns: `git push ... +ref`, `DROP SCHEMA/TABLE`,
   `curl|wget ... | sh/python/node/perl/ruby`, `chmod 0777`.
 
-### Agregado
-- `tests/hook-corpus.txt` + `tests/run-hook-corpus.sh`: corpus de
-  regresión (solo alimenta texto al hook, no ejecuta nada), con
-  limitaciones conocidas documentadas como `LIMITE-FN` / `LIMITE-FP`.
-- `scripts/guardian-doctor.sh`: autodiagnóstico del hook.
+### Added
+- `tests/hook-corpus.txt` + `tests/run-hook-corpus.sh`: regression
+  corpus (it only feeds text to the hook, nothing is executed), with
+  known limitations documented as `LIMITE-FN` / `LIMITE-FP`.
+- `scripts/guardian-doctor.sh`: hook self-diagnosis.
 
-### Cambiado
-- Documentación ajustada para no sobreprometer: el hook es una red
-  parcial basada en patrones de texto, no una garantía (ver
-  `constitution.md` sección 0, `skills/risk-analysis/SKILL.md`,
-  escenario 14).
+### Changed
+- Documentation adjusted to avoid over-promising: the hook is a partial
+  net based on text patterns, not a guarantee.
 
 ## [1.3.0] - 2026-08-07
 
-### Agregado
-- **Capa de enforcement técnico**: `hooks/hooks.json` +
-  `scripts/guardian-gate.sh`, un hook `PreToolUse` que intercepta
-  comandos de shell antes de ejecutarse y fuerza confirmación real
-  (`permissionDecision: "ask"`) para la lista de "Operaciones
-  críticas", sin depender de que el modelo decida pedirla.
-- `plugins/guardian-asimov/scripts/README.md`: documentación del hook,
-  requisitos (`jq`), y limitaciones conocidas.
-- Escenario `14-headless-mode-enforcement.md`, que documenta y valida
-  el caso real que motivó este cambio.
+### Added
+- **Technical enforcement layer**: `hooks/hooks.json` +
+  `scripts/guardian-gate.sh`, a `PreToolUse` hook that intercepts shell
+  commands before they run and forces a real confirmation
+  (`permissionDecision: "ask"`) for the "Critical operations" list,
+  without relying on the model deciding to ask.
+- `scripts/README.md`: hook documentation, requirements (`jq`), and
+  known limitations.
+- Scenario `14-headless-mode-enforcement.md`, documenting the real case
+  that motivated this change.
 
-### Corregido
-- **Hallazgo real (reportado por el usuario)**: en modo no interactivo
-  (`claude -p`, sin humano disponible para responder), la skill
-  `risk-analysis` por sí sola no bloqueaba una operación crítica
-  (`rm -rf`) — el modelo, sin nadie a quien preguntarle, intentó
-  ejecutarla igual, incluyendo intentos de saltear el sandbox nativo
-  de Claude Code. Solo la protección externa del sandbox evitó el
-  borrado; el framework instalado no había intervenido. Este release
-  agrega la capa de hook que cierra ese hueco: ahora la lista de
-  operaciones críticas queda bloqueada por un control técnico
-  independiente del razonamiento del modelo.
+### Fixed
+- **Real finding (reported by the user)**: in non-interactive mode
+  (`claude -p`, no human available to answer), the `risk-analysis` skill
+  alone did not block a critical operation (`rm -rf`) — the model, with
+  nobody to ask, tried to run it anyway, including attempts to bypass
+  Claude Code's native sandbox. Only the sandbox's external protection
+  prevented the deletion; the installed framework had not intervened.
+  This release adds the hook layer that closes that gap.
 
-### Cambiado
-- `constitution.md` (sección 0) y `skills/risk-analysis/SKILL.md`:
-  documentan explícitamente el modelo de dos capas (razonamiento vía
-  skills + enforcement técnico vía hook) y sus límites respectivos.
+### Changed
+- `constitution.md` (section 0) and `SKILL.md`: explicitly document the
+  two-layer model (reasoning via skills + technical enforcement via
+  hook) and their respective limits.
 
 ## [1.2.0] - 2026-08-07
 
-### Agregado
-- Módulo `skills/decision-log`: registra automáticamente en
-  `decision-log.md` (raíz del proyecto) cada intervención 🟡🔴⚫ una vez
-  resuelta por el usuario, y responde a pedidos de resumen del
-  historial ("mostrame qué frenó el framework", "auditá esta sesión").
-- `risk-analysis`: nuevo Paso 6 — Registrar, que conecta el motor de
-  decisión con `decision-log` al cierre de cada intervención.
-- Escenario de prueba `13-query-decision-log.md`.
-- Ejemplo de uso del log en `USAGE.md`.
+### Added
+- `decision-log` module: automatically records in `decision-log.md`
+  (project root) every 🟡🔴⚫ intervention once resolved by the user,
+  and answers requests to summarize the history ("show me what the
+  framework stopped", "audit this session").
+- Decision process: new Step 6 — Record, connecting the decision engine
+  with `decision-log` at the end of each intervention.
+- Test scenario `13-query-decision-log.md`.
+- Example usage of the log in `USAGE.md`.
 
 ## [1.1.0] - 2026-08-07
 
-### Agregado
-- Reestructuración como marketplace/plugin instalable de Claude Code
+### Added
+- Restructured as an installable Claude Code marketplace/plugin
   (`.claude-plugin/marketplace.json` + `plugins/guardian-asimov/`),
-  instalable con `/plugin install` en vez de copiar archivos a mano.
-- 4 escenarios de prueba nuevos en `tests/scenarios/`, cubriendo los
-  módulos que no tenían caso propio: `legal` (09), `privacy` (10),
-  `internet` (11) y `emergency` (12).
-- `tests/README.md`: explica cómo usar la suite de escenarios para
-  validar cambios al framework y como material de onboarding, más una
-  tabla de cobertura por módulo.
-- Documentación de instalación global (`--scope user`) en `README.md`
-  e `INSTALL.md`.
+  installable with `/plugin install` instead of copying files by hand.
+- 4 new test scenarios in `tests/scenarios/`, covering the modules that
+  had no case of their own: `legal` (09), `privacy` (10), `internet`
+  (11) and `emergency` (12).
+- `tests/README.md`: explains how to use the scenario suite to validate
+  changes to the framework and as onboarding material, plus a coverage
+  table by module.
+- Documentation for global installation (`--scope user`) in `README.md`
+  and `INSTALL.md`.
 
 ## [1.0.0] - 2026-08-07
 
-### Agregado
-- Primera versión del framework: `constitution.md` con las Tres Leyes
-  adaptadas y principios rectores.
-- Módulo núcleo `skills/risk-analysis` con el proceso de evaluación de
-  ocho dimensiones y clasificación 🟢🟡🔴⚫.
-- Módulos de dominio: `filesystem`, `database`, `git`, `shell`,
-  `security`, `privacy`, `legal`, `internet`.
-- Módulo `emergency` para contención y recuperación post-incidente.
-- Tres perfiles de configuración: `Paranoid`, `Balanced` (default),
-  `Expert` en `config/profiles.md`.
-- Documentación de instalación (`INSTALL.md`) y uso (`USAGE.md`) con
-  ejemplos reales de intervención por nivel de riesgo.
-- `DESIGN.md` con el razonamiento detrás de cada decisión de
-  arquitectura.
-- Suite inicial de escenarios de prueba en `tests/scenarios/` — casos
-  seguros, peligrosos y ambiguos.
+### Added
+- First version of the framework: `constitution.md` with the adapted
+  Three Laws and guiding principles.
+- Core module `risk-analysis` with the eight-dimension assessment and
+  🟢🟡🔴⚫ classification process.
+- Domain modules: `filesystem`, `database`, `git`, `shell`, `security`,
+  `privacy`, `legal`, `internet`.
+- `emergency` module for post-incident containment and recovery.
+- Three configuration profiles: `Paranoid`, `Balanced` (default),
+  `Expert` in `config/profiles.md`.
+- Installation (`INSTALL.md`) and usage (`USAGE.md`) documentation with
+  real examples of intervention by risk level.
+- `DESIGN.md` with the reasoning behind each architecture decision.
+- Initial suite of test scenarios in `tests/scenarios/` — safe,
+  dangerous and ambiguous cases.

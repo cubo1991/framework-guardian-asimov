@@ -1,5 +1,5 @@
 {
-  "description": "Guardian Asimov — capa de enforcement técnico. Antes de correr cualquier comando de shell, chequea si coincide con la lista de 'operaciones críticas' (rm -rf, git reset --hard, push --force, DROP DATABASE, etc.) y, si coincide, fuerza una confirmación real del usuario a través del sistema de permisos de Claude Code — no depende de que el modelo decida pedirla. Se invoca con 'bash' (no requiere bit de ejecución) y, si el hook falla, bloquea en vez de dejar pasar el comando (onFailure: block, Claude Code v2.1.295+).",
+  "description": "Guardian Risk Gate — optional technical enforcement layer. Before any shell command runs, it checks whether it matches the 'critical operations' list (rm -rf, git reset --hard, push --force, DROP DATABASE, etc.) and, if so, forces a real user confirmation through Claude Code's permission system — it does not depend on the model deciding to ask. Invoked with 'bash' (no execute bit needed) and, if the hook fails, it blocks instead of letting the command through (onFailure: block, Claude Code v2.1.295+).",
   "hooks": {
     "PreToolUse": [
       {

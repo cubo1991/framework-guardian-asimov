@@ -1,40 +1,40 @@
 #!/bin/bash
-# guardian-gate.sh — Framework Guardian Asimov, capa de enforcement técnico.
+# guardian-gate.sh — Guardian Risk Gate, technical enforcement layer.
 #
-# Se ejecuta como hook PreToolUse antes de cualquier comando Bash/PowerShell.
-# Si el comando coincide con la lista de "operaciones críticas" definida en
-# SKILL.md, fuerza una confirmación real a través del
-# sistema de permisos de Claude Code (permissionDecision: "ask"), en vez de
-# depender de que el modelo decida pedirla por su cuenta.
+# Runs as a PreToolUse hook before any Bash/PowerShell command.
+# If the command matches the "critical operations" list defined in
+# SKILL.md, it forces a real confirmation through Claude Code's permission
+# system (permissionDecision: "ask"), instead of relying on the model to
+# decide to ask on its own.
 #
-# Requiere: bash, jq. Ver INSTALL.md si tu entorno no los tiene.
+# Requires: bash, jq. See INSTALL.md if your environment lacks them.
 #
-# Límites (ver scripts/README.md): son patrones regex sobre el texto del
-# comando, no un parser de shell. No ve indirección (eval, variables,
-# python -c), y un texto que contenga el patrón (mensaje de commit, grep)
-# también dispara la confirmación.
+# Limits (see scripts/README.md): these are regex patterns over the command
+# text, not a shell parser. It cannot see indirection (eval, variables,
+# python -c), and text that merely contains a pattern (a commit message,
+# a grep) also triggers the confirmation.
 
 input=$(cat)
 
-# Sin jq no se puede evaluar el comando: se pide confirmación (falla cerrado)
-# en vez de dejar pasar todo en silencio.
+# Without jq the command cannot be evaluated: ask for confirmation (fail
+# closed) instead of silently letting everything through.
 ask_nojq() {
-  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Guardian Asimov: jq no está instalado, por lo que este comando no se puede evaluar. Confirmá manualmente o instalá jq (ver INSTALL.md)."}}'
+  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Guardian Risk Gate: jq is not installed, so this command cannot be evaluated. Confirm manually or install jq (see INSTALL.md)."}}'
   exit 0
 }
 command -v jq >/dev/null 2>&1 || ask_nojq
 
 command=$(printf '%s' "$input" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
-# Si no se pudo leer el comando (input inesperado), no bloquear — dejar que
-# siga el flujo normal de permisos.
+# If the command could not be read (unexpected input), do not block — let
+# the normal permission flow continue.
 [ -z "$command" ] && exit 0
 
 has() { printf '%s' "$command" | grep -Eiq "$1"; }
 
 hit=""
 
-# rm con flag recursivo Y flag forzado, en cualquier forma u orden
+# rm with a recursive flag AND a force flag, in any form or order
 # (-rf, -fr, -r -f, --recursive --force, etc.).
 if has '(^|[^[:alnum:]_-])rm[[:space:]]' \
    && has '[[:space:]](-[a-z]*r[a-z]*|--recursive)([[:space:]]|$)' \
@@ -42,15 +42,14 @@ if has '(^|[^[:alnum:]_-])rm[[:space:]]' \
   hit=1
 fi
 
-# DELETE FROM sin WHERE (alineado con SKILL.md:
-# "DELETE masivos sin WHERE acotado").
+# DELETE FROM without WHERE (aligned with SKILL.md:
+# mass DELETE without a narrow WHERE).
 if has 'DELETE[[:space:]]+FROM' && ! has 'WHERE'; then
   hit=1
 fi
 
-# Patrones de "Operaciones críticas" — deben mantenerse alineados con la
-# lista de SKILL.md. Cualquier cambio a esa lista
-# debería reflejarse acá también.
+# "Critical operations" patterns — must stay aligned with the list in
+# SKILL.md. Any change to that list should be reflected here too.
 PATTERN='Remove-Item[^|;]*-Recurse[^|;]*-Force'
 PATTERN="$PATTERN"'|Remove-Item[^|;]*-Force[^|;]*-Recurse'
 PATTERN="$PATTERN"'|git[[:space:]]+reset[[:space:]]+--hard'
@@ -68,7 +67,7 @@ PATTERN="$PATTERN"'|dd[[:space:]]+if=.*of=/dev/'
 PATTERN="$PATTERN"'|mkfs\.'
 
 if [ -n "$hit" ] || has "$PATTERN"; then
-  reason="Guardian Asimov (enforcement técnico): este comando coincide con la lista de operaciones críticas (irreversibles o de alto impacto) del framework (ver SKILL.md). Necesita confirmación real del usuario antes de ejecutarse, incluso si el modelo decidió proceder solo. Comando detectado: ${command}"
+  reason="Guardian Risk Gate (technical enforcement): this command matches the framework's list of critical operations (irreversible or high-impact) — see SKILL.md. It needs real user confirmation before running, even if the model decided to proceed on its own. Detected command: ${command}"
   jq -n --arg reason "$reason" '{
     hookSpecificOutput: {
       hookEventName: "PreToolUse",

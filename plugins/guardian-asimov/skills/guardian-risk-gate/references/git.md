@@ -1,51 +1,51 @@
-# Git — riesgo sobre el historial del proyecto
+# Git — risk to the project history
 
-## Checklist previa
+## Pre-check
 
-- ¿El comando **reescribe historial** (`rebase`, `commit --amend` ya
-  pusheado, `filter-branch`) o **descarta cambios** (`reset --hard`,
-  `checkout -- .`, `clean -fd`)?
-- ¿Hay **cambios sin commitear** que se perderían?
-- ¿La rama es **local** o ya fue **pusheada/compartida** con otros?
-- ¿Un `push --force` puede pisar commits de otra persona?
-- ¿Se está por borrar una **rama** que no está mergeada?
+- Does the command **rewrite history** (`rebase`, `commit --amend` on
+  something already pushed, `filter-branch`) or **discard changes**
+  (`reset --hard`, `checkout -- .`, `clean -fd`)?
+- Are there **uncommitted changes** that would be lost?
+- Is the branch **local** or already **pushed/shared** with others?
+- Can a `push --force` overwrite someone else's commits?
+- Is it about to delete a **branch** that is not merged?
 
-## Clasificación rápida
+## Quick classification
 
-- 🟢 `status`, `log`, `diff`, `add`, `commit` normal, `push` sin force,
-  crear ramas nuevas, `pull` sin conflictos.
-- 🟡 `reset --soft`/`--mixed` (no pierde working tree), `checkout` a otra
-  rama con cambios ya commiteados, `merge`.
-- 🔴 `reset --hard` con cambios sin commitear, `clean -fd`, `rebase` de
-  una rama ya pusheada, borrar una rama local no mergeada.
-- ⚫ `push --force` a una rama compartida (main/develop/producción),
-  `filter-branch`/reescritura de historial ya publicado, borrar una
-  rama remota, cualquier operación que pueda destruir el trabajo de
-  otra persona del equipo.
+- 🟢 `status`, `log`, `diff`, `add`, a normal `commit`, `push` without
+  force, creating new branches, `pull` without conflicts.
+- 🟡 `reset --soft`/`--mixed` (does not lose the working tree),
+  `checkout` to another branch with changes already committed, `merge`.
+- 🔴 `reset --hard` with uncommitted changes, `clean -fd`, `rebase` of
+  an already-pushed branch, deleting an unmerged local branch.
+- ⚫ `push --force` to a shared branch (main/develop/production),
+  `filter-branch`/rewriting already-published history, deleting a
+  remote branch, any operation that could destroy a teammate's work.
 
-## Reglas específicas
+## Specific rules
 
-1. **`--hard` y `-f`/`--force` son banderas de alerta automática.**
-   Cualquier comando que las incluya sube como mínimo a 🔴.
-2. **Antes de descartar cambios**, avisar qué se va a perder
-   (`git status`/`git diff` primero) — nunca asumir que "no importa".
-3. **`push --force` a rama compartida = siempre ⚫.** Si es la rama
-   propia del usuario y nadie más la usa, puede bajar a 🔴 avisando,
-   pero nunca se ejecuta sin decir explícitamente qué commits se van a
-   perder para los demás.
-4. **Preferir alternativas no destructivas**: `git stash` en vez de
-   `checkout -- .`; `push --force-with-lease` en vez de `--force` a
-   secas (falla si alguien más pusheó, en vez de pisarlo silenciosamente).
-5. **Borrado de ramas remotas**: confirmar explícitamente el nombre de
-   la rama antes de borrar, y verificar que esté mergeada o que el
-   usuario sepa que no lo está.
+1. **`--hard` and `-f`/`--force` are automatic red flags.** Any command
+   that includes them rises to 🔴 at minimum.
+2. **Before discarding changes**, say what will be lost (`git status`/
+   `git diff` first) — never assume "it doesn't matter".
+3. **`push --force` to a shared branch = always ⚫.** If it is the
+   user's own branch and nobody else uses it, it can drop to 🔴 with a
+   warning, but it is never executed without explicitly saying which
+   commits others will lose.
+4. **Prefer non-destructive alternatives**: `git stash` instead of
+   `checkout -- .`; `push --force-with-lease` instead of a bare
+   `--force` (it fails if someone else pushed, instead of silently
+   overwriting).
+5. **Deleting remote branches**: explicitly confirm the branch name
+   before deleting, and verify it is merged or that the user knows it
+   is not.
 
-## Ejemplo de intervención
+## Example intervention
 
-> Usuario: "Hacé reset hard al último commit y pusheá force."
-> Framework: ⚫ Crítico — `reset --hard` descarta permanentemente
-> cualquier cambio sin commitear que tengas ahora, y el `push --force`
-> puede pisar commits de otras personas si la rama es compartida.
-> Alternativa más segura: `push --force-with-lease`, que aborta si
-> alguien más subió algo. ¿Confirmás que no hay cambios locales que
-> quieras conservar y que la rama es solo tuya?
+> User: "Hard reset to the last commit and force push."
+> Framework: ⚫ Critical — `reset --hard` permanently discards any
+> uncommitted changes you have right now, and `push --force` can
+> overwrite other people's commits if the branch is shared. Safer
+> alternative: `push --force-with-lease`, which aborts if someone else
+> pushed something. Do you confirm there are no local changes you want
+> to keep and that the branch is yours alone?

@@ -1,53 +1,56 @@
-# Shell — riesgo en comandos de terminal
+# Shell — risk in terminal commands
 
-## Checklist previa
+## Pre-check
 
-- ¿El comando **borra, mueve o sobrescribe** algo (`rm`, `mv`, `>`)?
-- ¿Requiere **privilegios elevados** (`sudo`)?
-- ¿**Instala o desinstala** software o dependencias a nivel sistema?
-- ¿Cambia **permisos** (`chmod`/`chown`) de forma amplia (`-R`)?
-- ¿Descarga y **ejecuta código de internet directamente**
+- Does the command **delete, move or overwrite** anything (`rm`, `mv`,
+  `>`)?
+- Does it require **elevated privileges** (`sudo`)?
+- Does it **install or uninstall** software or dependencies at system
+  level?
+- Does it change **permissions** (`chmod`/`chown`) broadly (`-R`)?
+- Does it download and **execute code from the internet directly**
   (`curl ... | bash`)?
-- ¿Puede consumir recursos de forma descontrolada (fork bombs, procesos
-  sin límite, loops infinitos)?
-- ¿El efecto del comando es **fácil de predecir** con certeza, o hay
-  flags/comportamiento que no se conoce con precisión?
+- Can it consume resources uncontrollably (fork bombs, unbounded
+  processes, infinite loops)?
+- Is the command's effect **easy to predict** with certainty, or are
+  there flags/behavior that are not known precisely?
 
-## Clasificación rápida
+## Quick classification
 
-- 🟢 Comandos de lectura/inspección (`ls`, `cat`, `grep`, `ps`, `df`),
-  ejecución de scripts del propio proyecto en su entorno normal.
-- 🟡 Instalar una dependencia declarada (`npm install`, `pip install` de
-  un paquete conocido), crear/mover archivos dentro del proyecto.
-- 🔴 `sudo` para cambios de sistema, `chmod -R`/`chown -R`, instalar
-  software fuera del proyecto, matar procesos que no son propios.
-- ⚫ `rm -rf` (especialmente con rutas amplias o variables sin validar),
-  `curl | bash` sin inspeccionar el script antes, cualquier comando que
-  pueda afectar el sistema operativo host completo o correr con
-  privilegios totales sin necesidad clara.
+- 🟢 Read/inspection commands (`ls`, `cat`, `grep`, `ps`, `df`),
+  running the project's own scripts in its normal environment.
+- 🟡 Installing a declared dependency (`npm install`, `pip install` of
+  a known package), creating/moving files inside the project.
+- 🔴 `sudo` for system changes, `chmod -R`/`chown -R`, installing
+  software outside the project, killing processes that are not your
+  own.
+- ⚫ `rm -rf` (especially with broad paths or unvalidated variables),
+  `curl | bash` without inspecting the script first, any command that
+  could affect the entire host operating system or run with full
+  privileges without a clear need.
 
-## Reglas específicas
+## Specific rules
 
-1. **Nunca correr `curl/wget | bash` (o similar) sin mostrarle antes al
-   usuario qué hace el script**, o al menos advertir que no se puede
-   verificar el contenido antes de ejecutarlo.
-2. **Variables sin validar en comandos destructivos son una bandera
-   roja**: `rm -rf $VAR/*` si `$VAR` puede estar vacío borra todo desde
-   la raíz del filesystem actual. Siempre validar o entrecomillar y
-   confirmar el valor antes de correr.
-3. **Preferir el comando más específico y menos destructivo** que logre
-   el mismo resultado (por ejemplo, borrar archivo por archivo en vez de
-   un glob amplio, si la cantidad es manejable).
-4. **`sudo` es siempre una pausa**: explicar qué privilegio se necesita y
-   por qué, aunque el usuario ya lo haya pedido.
-5. **Explicar siempre, en una línea, qué hace un comando destructivo**
-   antes de correrlo — no asumir que "es obvio".
+1. **Never run `curl/wget | bash` (or similar) without first showing
+   the user what the script does**, or at least warning that its
+   contents cannot be verified before running.
+2. **Unvalidated variables in destructive commands are a red flag**:
+   `rm -rf $VAR/*` with `$VAR` possibly empty deletes everything from
+   the current filesystem root. Always validate or quote, and confirm
+   the value before running.
+3. **Prefer the most specific, least destructive command** that
+   achieves the same result (for example, deleting file by file
+   instead of a broad glob, if the count is manageable).
+4. **`sudo` is always a pause**: explain what privilege is needed and
+   why, even if the user already asked for it.
+5. **Always explain, in one line, what a destructive command does**
+   before running it — don't assume "it's obvious".
 
-## Ejemplo de intervención
+## Example intervention
 
-> Usuario: "Corré `rm -rf $BUILD_DIR/*` para limpiar."
-> Framework: 🔴 Alto — si `$BUILD_DIR` no está seteada o está vacía, ese
-> comando borra desde la raíz actual, no solo el build. Antes de correr,
-> confirmo el valor real de la variable (`echo $BUILD_DIR`) y si no está
-> vacía, sigo con el borrado apuntando a la ruta ya expandida en vez de
-> la variable.
+> User: "Run `rm -rf $BUILD_DIR/*` to clean up."
+> Framework: 🔴 High — if `$BUILD_DIR` is unset or empty, that command
+> deletes from the current root, not just the build. Before running, I
+> confirm the variable's real value (`echo $BUILD_DIR`), and if it is
+> not empty, I proceed with the deletion pointing at the already
+> expanded path instead of the variable.

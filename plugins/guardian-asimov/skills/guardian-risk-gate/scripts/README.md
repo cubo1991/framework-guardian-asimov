@@ -1,70 +1,71 @@
-# scripts/ y hooks/
+# scripts/ (optional Claude Code hook)
 
-`hooks/hooks.json` registra un hook `PreToolUse` que corre
-`scripts/guardian-gate.sh` antes de cualquier comando `Bash` o
-`PowerShell`.
+This folder is **optional**. The skill (`SKILL.md`) works on its own in
+any agent that supports Agent Skills. The scripts add a technical brake
+only in Claude Code, where the plugin's `hooks/hooks.json` registers a
+`PreToolUse` hook that runs `scripts/guardian-gate.sh` before any
+`Bash` or `PowerShell` command.
 
-## Qué hace `guardian-gate.sh`
+## What `guardian-gate.sh` does
 
-Lee el comando que Claude Code está por ejecutar y lo compara contra
-los mismos patrones de "Operaciones críticas" descriptos en
-`SKILL.md` (`rm -rf`, `git reset --hard`,
-`git push --force`, `DROP DATABASE`, `TRUNCATE`, `sudo rm`,
-`curl | bash`, `chmod -R 777`, etc.). Si coincide, devuelve
-`permissionDecision: "ask"` — lo que dispara el diálogo de permisos
-real de Claude Code, no una simple sugerencia de texto. El hook se
-invoca con `bash` (no depende del bit de ejecución) y tiene
-`onFailure: "block"`: si el hook falla, el comando se bloquea en vez de
-pasar.
+It reads the command Claude Code is about to run and compares it
+against the same "Critical operations" patterns described in `SKILL.md`
+(`rm -rf`, `git reset --hard`, `git push --force`, `DROP DATABASE`,
+`TRUNCATE`, `sudo rm`, `curl | bash`, `chmod -R 777`, etc.). If it
+matches, it returns `permissionDecision: "ask"` — which triggers
+Claude Code's real permission dialog, not a mere text suggestion. The
+hook is invoked with `bash` (it does not depend on the execute bit) and
+has `onFailure: "block"`: if the hook fails, the command is blocked
+instead of passing.
 
-Efecto según el modo:
+Effect by mode:
 
-- **Sesión interactiva**: el usuario ve el pedido de permiso y decide
-  — igual que cualquier otra confirmación de Claude Code, pero
-  forzada por este hook cuando el comando coincide, incluso si el
-  modelo "se olvidó" de preguntar.
-- **Modo no interactivo (`-p`, sin humano disponible)**: al no haber
-  quién responda esa confirmación, la acción queda sin ejecutar. Ver `tests/scenarios/14-headless-mode-enforcement.md`.
+- **Interactive session**: the user sees the permission request and
+  decides — like any other Claude Code confirmation, but forced by this
+  hook when the command matches, even if the model "forgot" to ask.
+- **Non-interactive mode (`-p`, no human available)**: with nobody to
+  answer that confirmation, the action is left unexecuted. See
+  `evals/scenarios/14-headless-mode-enforcement.md`.
 
-## Requisitos
+## Requirements
 
-- `bash` y `jq` deben estar disponibles en el entorno donde corre
-  Claude Code. Si `jq` no está instalado, el script
-  falla cerrado: devuelve `ask` para todo comando (v1.3.1; antes
-  dejaba pasar todo en silencio). Instalar `jq`: `apt install jq` /
-  `brew install jq` / `choco install jq`, según tu sistema.
+- `bash` and `jq` must be available in the environment where Claude
+  Code runs. If `jq` is not installed, the script fails closed: it
+  returns `ask` for every command (v1.3.1; before, it silently let
+  everything through). Install `jq`: `apt install jq` / `brew install jq`
+  / `choco install jq`, depending on your system.
 
-## Verificar que funciona
+## Verify that it works
 
-- `bash scripts/guardian-doctor.sh` — autodiagnóstico: dependencias,
-  `hooks.json`, `onFailure`, y que un comando crítico de prueba dispare
-  la confirmación (no ejecuta nada).
-- `bash tests/run-hook-corpus.sh` — corpus de regresión
-  (`tests/hook-corpus.txt`): qué se detecta, qué no (`LIMITE-FN`) y qué
-  da falsos positivos (`LIMITE-FP`). Solo alimenta texto al hook.
+- `bash scripts/guardian-doctor.sh` — self-diagnosis: dependencies,
+  `hooks.json`, `onFailure`, and that a critical test command triggers
+  the confirmation (it executes nothing).
+- `bash evals/run-hook-corpus.sh` — regression corpus
+  (`evals/hook-corpus.txt`): what is detected, what is not (`LIMIT-FN`)
+  and what gives false positives (`LIMIT-FP`). It only feeds text to the
+  hook.
 
-## Mantener el patrón sincronizado
+## Keeping the pattern in sync
 
-Si agregás una operación nueva a la lista de "Operaciones críticas" en
-`SKILL.md`, sumá también el patrón correspondiente
-en la variable `PATTERN` de `guardian-gate.sh` — son dos listas que
-deben mantenerse alineadas a mano, no hay generación automática entre
-ellas.
+If you add a new operation to the "Critical operations" list in
+`SKILL.md`, also add the matching pattern to the `PATTERN` variable in
+`guardian-gate.sh` — they are two lists that must be kept aligned by
+hand; there is no automatic generation between them.
 
-## Alcance actual y limitaciones conocidas
+## Current scope and known limitations
 
-- Cubre comandos de shell (`Bash`/`PowerShell`). No cubre operaciones
-  hechas a través de otras herramientas (ej. un MCP server de base de
-  datos que ejecuta SQL sin pasar por una terminal) — para eso, la
-  única capa activa hoy es la de razonamiento (`skills/database`).
-- El script está pensado para bash/Git Bash. En Windows sin Git Bash
-  instalado, el hook puede no ejecutarse correctamente — ver
-  `ROADMAP.md` para la idea de un port a PowerShell puro.
-- Los patrones son heurísticos (regex), no un parser real de shell —
-  pueden dar falsos positivos (piden confirmación de más, sin
-  problema) pero, más importante, en teoría también falsos negativos
-  ante cualquier comando por indirección (`eval`, variables,
-  `python -c`) o no listado (`find -delete`, `terraform destroy`,
-  `kubectl delete`, `docker system prune`, etc.; ver el corpus). No
-  reemplaza el buen juicio, es una red de seguridad adicional.
-- Verificado en Linux. Windows (Git Bash) y macOS sin probar.
+- Covers shell commands (`Bash`/`PowerShell`). It does not cover
+  operations done through other tools (e.g. a database MCP server that
+  runs SQL without going through a terminal) — for those, the only
+  active layer today is the reasoning one (`references/database.md`).
+- The script is designed for bash/Git Bash. On Windows without Git Bash
+  installed, the hook may not run correctly — see `ROADMAP.md` for the
+  idea of a pure PowerShell port.
+- The patterns are heuristic (regex), not a real shell parser — they
+  can give false positives (asking for confirmation unnecessarily,
+  harmless) but, more importantly, also false negatives for any command
+  built through indirection (`eval`, variables, `python -c`) or not
+  listed (`find -delete`, `terraform destroy`, `kubectl delete`,
+  `docker system prune`, etc.; see the corpus). It does not replace good
+  judgment; it is an additional safety net.
+- Verified on Linux. Windows (Git Bash) and macOS untested.

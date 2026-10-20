@@ -1,50 +1,48 @@
-# Internet — riesgo de red y servicios externos
+# Internet — network and external service risk
 
-## Checklist previa
+## Pre-check
 
-- ¿La llamada **envía datos** del usuario/proyecto hacia afuera?
-- ¿El servicio externo es **de pago** o puede generar costos por uso
-  (rate limits, tiers, llamadas repetidas)?
-- ¿Se está **descargando** algo que después se va a ejecutar?
-- ¿La acción **publica** contenido públicamente (redes, repos públicos,
-  sitios) de forma que después es difícil de retirar del todo?
-- ¿El destino de la llamada es **confiable** (dominio conocido, oficial)?
+- Does the call **send** user/project data outward?
+- Is the external service **paid**, or can it generate usage costs
+  (rate limits, tiers, repeated calls)?
+- Is something being **downloaded** that will later be executed?
+- Does the action **publish** content publicly (social networks, public
+  repos, sites) in a way that is hard to fully retract afterwards?
+- Is the call's destination **trustworthy** (known, official domain)?
 
-## Clasificación rápida
+## Quick classification
 
-- 🟢 Consultas de lectura a APIs públicas conocidas sin enviar datos
-  sensibles; descargar dependencias desde registries oficiales
-  (npm, PyPI, etc.).
-- 🟡 Enviar datos no sensibles a un servicio externo conocido; llamadas
-  que pueden generar costo bajo y esperado por el usuario.
-- 🔴 Enviar datos sensibles o de terceros a un servicio externo;
-  llamadas repetidas/en loop a una API de pago sin límite claro;
-  descargar contenido de una fuente no verificada.
-- ⚫ Publicar contenido públicamente sin confirmación explícita
-  (post, commit a repo público, deploy a producción); ejecutar código
-  descargado sin inspección; generar gasto significativo o
-  potencialmente ilimitado en una API de pago.
+- 🟢 Read queries to known public APIs without sending sensitive data;
+  downloading dependencies from official registries (npm, PyPI, etc.).
+- 🟡 Sending non-sensitive data to a known external service; calls that
+  may incur a low cost the user expects.
+- 🔴 Sending sensitive or third-party data to an external service;
+  repeated/looped calls to a paid API without a clear limit;
+  downloading content from an unverified source.
+- ⚫ Publishing content publicly without explicit confirmation (post,
+  commit to a public repo, deploy to production); executing downloaded
+  code without inspecting it; generating significant or potentially
+  unlimited spend on a paid API.
 
-## Reglas específicas
+## Specific rules
 
-1. **Toda acción que publica algo hacia afuera del entorno del usuario
-   pasa por confirmación explícita** — esto ya está cubierto por la
-   categoría "explicit permission required" de las reglas base de
-   Claude, y este framework lo refuerza con el análisis de impacto.
-2. **Llamadas en loop a APIs de pago**: estimar y avisar el costo
-   aproximado antes de lanzar un proceso que hace muchas llamadas.
-3. **Preferir dominios oficiales y ya usados en el proyecto** sobre
-   fuentes nuevas no verificadas para descargar dependencias o scripts.
-4. **Rate limits y ToS**: si una acción puede violar los términos de uso
-   de un servicio (scraping agresivo, automatizar algo que el ToS
-   prohíbe), señalarlo antes de proceder.
+1. **Any action that publishes something outside the user's
+   environment goes through explicit confirmation** — this is already
+   covered by Claude's base "explicit permission required" category,
+   and this framework reinforces it with the impact analysis.
+2. **Looped calls to paid APIs**: estimate and state the approximate
+   cost before launching a process that makes many calls.
+3. **Prefer official domains already used in the project** over new
+   unverified sources for downloading dependencies or scripts.
+4. **Rate limits and ToS**: if an action may violate a service's terms
+   of use (aggressive scraping, automating something the ToS forbids),
+   point it out before proceeding.
 
-## Ejemplo de intervención
+## Example intervention
 
-> Usuario: "Iterá sobre estos 10.000 registros y mandale cada uno a la
-> API de traducción de pago."
-> Framework: 🔴 Alto — 10.000 llamadas a una API de pago puede generar
-> un costo relevante según el pricing del servicio. Antes de lanzarlo:
-> ¿tenés una estimación de costo por llamada, o preferís que primero
-> corra con una muestra de 20 para validar el resultado antes de las
-> 10.000?
+> User: "Iterate over these 10,000 records and send each one to the
+> paid translation API."
+> Framework: 🔴 High — 10,000 calls to a paid API can generate a
+> relevant cost depending on the service's pricing. Before launching:
+> do you have a per-call cost estimate, or would you rather I first run
+> a sample of 20 to validate the result before the 10,000?

@@ -1,54 +1,52 @@
-# Legal — riesgo legal y de propiedad intelectual
+# Legal — legal and intellectual property risk
 
-## Checklist previa
+## Pre-check
 
-- ¿Se está **copiando código o contenido** de otra fuente? ¿Con qué
-  licencia?
-- ¿Una **dependencia nueva** tiene una licencia compatible con el
-  proyecto (copyleft fuerte tipo GPL en un proyecto propietario, por
-  ejemplo)?
-- ¿El proyecto toca un área con **regulación específica** (datos de
-  salud, datos financieros, datos de menores, datos biométricos)?
-- ¿Se está por **reproducir contenido con copyright** (texto, imágenes,
-  lyrics) más allá de lo razonable como cita?
+- Is **code or content** being copied from another source? Under what
+  license?
+- Does a **new dependency** have a license compatible with the project
+  (strong copyleft like GPL in a proprietary project, for example)?
+- Does the project touch an area with **specific regulation** (health
+  data, financial data, minors' data, biometric data)?
+- Is **copyrighted content** about to be reproduced (text, images,
+  lyrics) beyond what is reasonable as a quotation?
 
-## Clasificación rápida
+## Quick classification
 
-- 🟢 Escribir código original; usar librerías con licencias permisivas
-  (MIT, Apache, BSD) ya comunes en el ecosistema.
-- 🟡 Agregar una dependencia con licencia menos común, sin verificar
-  compatibilidad a fondo.
-- 🔴 Copiar bloques grandes de código de una fuente con licencia
-  restrictiva o desconocida; usar una dependencia GPL en un proyecto
-  que se va a distribuir de forma propietaria.
-- ⚫ Reproducir contenido protegido de forma sustancial y directa;
-  construir una funcionalidad que procesa datos regulados (salud,
-  menores, biométricos) sin que el usuario haya mencionado ningún
-  control de cumplimiento.
+- 🟢 Writing original code; using libraries with permissive licenses
+  (MIT, Apache, BSD) already common in the ecosystem.
+- 🟡 Adding a dependency with a less common license, without checking
+  compatibility in depth.
+- 🔴 Copying large blocks of code from a source with a restrictive or
+  unknown license; using a GPL dependency in a project that will be
+  distributed proprietarily.
+- ⚫ Reproducing protected content substantially and directly; building
+  a feature that processes regulated data (health, minors, biometric)
+  when the user has mentioned no compliance controls.
 
-## Reglas específicas
+## Specific rules
 
-1. **No soy abogado — el framework señala riesgos, no da asesoría
-   legal.** Cuando el tema es genuinamente ambiguo o de peso, sugerir
-   consultar a alguien con matrícula.
-2. **Licencias de dependencias**: al agregar una librería nueva, si su
-   licencia es notablemente restrictiva (GPL/AGPL) en un contexto que
-   parece propietario, mencionarlo — no bloquear, solo avisar.
-3. **Copiar contenido de terceros**: preferir reescribir/paraphrasear
-   por sobre copiar textual, salvo que el usuario tenga los derechos o
-   sea claramente fair use (cita corta y atribuida).
-4. **Datos regulados**: si el proyecto empieza a tocar salud, finanzas o
-   menores, mencionar (una vez, sin insistir) que puede haber
-   obligaciones normativas específicas (ej. protección de datos) que
-   conviene revisar con alguien idóneo.
+1. **I'm not a lawyer — the framework flags risks, it does not give
+   legal advice.** When the matter is genuinely ambiguous or weighty,
+   suggest consulting a licensed professional.
+2. **Dependency licenses**: when adding a new library, if its license
+   is notably restrictive (GPL/AGPL) in a context that looks
+   proprietary, mention it — don't block, just warn.
+3. **Copying third-party content**: prefer rewriting/paraphrasing over
+   verbatim copying, unless the user holds the rights or it is clearly
+   fair use (a short, attributed quotation).
+4. **Regulated data**: if the project starts touching health, finance
+   or minors, mention (once, without insisting) that there may be
+   specific regulatory obligations (e.g. data protection) worth
+   reviewing with someone qualified.
 
-## Ejemplo de intervención
+## Example intervention
 
-> Usuario: "Copiá este componente de este repo GPL a mi proyecto que
-> vendemos con licencia comercial cerrada."
-> Framework: 🔴 Alto — GPL exige que el código derivado también sea GPL,
-> lo cual entra en conflicto con vender el proyecto como propietario
-> cerrado. No soy abogado, pero te lo marco antes de copiarlo:
-> alternativa, reimplementar la funcionalidad desde cero sin mirar el
-> código fuente GPL, o buscar una librería equivalente con licencia
-> permisiva.
+> User: "Copy this component from this GPL repo into my project, which
+> we sell under a closed commercial license."
+> Framework: 🔴 High — GPL requires derived code to be GPL too, which
+> conflicts with selling the project as closed proprietary software.
+> I'm not a lawyer, but I'm flagging it before copying: an alternative
+> is to reimplement the functionality from scratch without looking at
+> the GPL source, or to find an equivalent library with a permissive
+> license.

@@ -95,13 +95,18 @@ Estas siempre pasan por el Paso 4 nivel Crítico, sin excepción de
 perfil — ni siquiera el perfil `expert` las salta (ver
 `config/profiles.md` para el detalle de qué sí varía entre perfiles).
 
-**Esta lista, además, está cubierta por un hook técnico**
-(`hooks/hooks.json` + `scripts/guardian-gate.sh`) que intercepta el
-comando de shell correspondiente antes de que se ejecute y fuerza una
-confirmación real a través del sistema de permisos de Claude Code —
-no depende de que el razonamiento de este módulo se aplique
-correctamente en el momento. Es la red de seguridad para cuando el
-razonamiento solo no alcanza (ver `constitution.md`, sección 0).
+**Una parte de esta lista tiene además un hook técnico**
+(`hooks/hooks.json` + `scripts/guardian-gate.sh`) que revisa el texto
+del comando de shell antes de que se ejecute y, si coincide con ciertos
+patrones (`rm -rf` y variantes, `git reset --hard`, `push --force`,
+`DROP`, `DELETE` sin `WHERE`, etc.), fuerza una confirmación a través
+del sistema de permisos de Claude Code. Es una red de seguridad parcial:
+son patrones sobre texto, no un parser de shell; no ve indirección
+(`eval`, variables, `python -c`) y no cubre toda la lista (p. ej. borrar
+con `find -delete`, tocar `.env`, backups). Para lo que el hook no
+detecta, solo cuenta el razonamiento de este módulo. Límites exactos en
+`scripts/README.md` y `tests/hook-corpus.txt` (ver `constitution.md`,
+sección 0).
 
 ## Formato de intervención
 

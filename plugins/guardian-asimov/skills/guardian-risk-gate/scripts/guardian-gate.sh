@@ -57,7 +57,6 @@ PATTERN="$PATTERN"'|git[[:space:]]+clean[[:space:]]+-[a-zA-Z]*f'
 PATTERN="$PATTERN"'|git[[:space:]]+push[^|;]*(--force([[:space:]]|$)|[[:space:]]-f([[:space:]]|$))'
 PATTERN="$PATTERN"'|git[[:space:]]+push[^|;]*[[:space:]]\+[^[:space:]]'
 PATTERN="$PATTERN"'|git[[:space:]]+push[^|;]*--delete'
-PATTERN="$PATTERN"'|git[[:space:]]+branch[[:space:]]+-D'
 PATTERN="$PATTERN"'|DROP[[:space:]]+(DATABASE|SCHEMA|TABLE)'
 PATTERN="$PATTERN"'|TRUNCATE[[:space:]]+TABLE'
 PATTERN="$PATTERN"'|sudo[[:space:]]+rm'
@@ -65,6 +64,12 @@ PATTERN="$PATTERN"'|(curl|wget)[^|;]*\|[[:space:]]*(sudo[[:space:]]+)?((ba|z)?sh
 PATTERN="$PATTERN"'|chmod[[:space:]]+(-R[[:space:]]+)?0?777'
 PATTERN="$PATTERN"'|dd[[:space:]]+if=.*of=/dev/'
 PATTERN="$PATTERN"'|mkfs\.'
+
+# `git branch -D` must be matched case-sensitively: `-d` (merged branches only)
+# is safe and must not trigger.
+if printf '%s' "$command" | grep -Eq 'git[[:space:]]+branch[[:space:]]+-D([[:space:]]|$)'; then
+  hit=1
+fi
 
 if [ -n "$hit" ] || has "$PATTERN"; then
   reason="Guardian Risk Gate (technical enforcement): this command matches the framework's list of critical operations (irreversible or high-impact) — see SKILL.md. It needs real user confirmation before running, even if the model decided to proceed on its own. Detected command: ${command}"

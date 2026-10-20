@@ -138,6 +138,27 @@ per-domain details are loaded on demand from `references/` (progressive
 disclosure). See `plugins/guardian-asimov/DESIGN.md` for the full
 reasoning behind this architecture.
 
+## How this was built
+
+This project was developed with the help of Claude (Anthropic's AI
+assistant), with the author directing the work and reviewing the result.
+Because AI-assisted work needs checking, the claims in this repository
+are backed by tests you can rerun:
+
+- `evals/hook-corpus.txt` + `evals/run-hook-corpus.sh`: a regression
+  corpus for the hook that records what it detects, what it misses and
+  where it raises false alarms. Nothing in it is executed; it only feeds
+  command text to the hook.
+- `scripts/guardian-doctor.sh`: checks that the hook can actually start
+  in your environment (a hook that silently fails is worse than none).
+- Headless end-to-end checks with `claude -p`, compared against a
+  no-plugin baseline.
+- Known limits are documented instead of hidden: see "What the hook does
+  NOT do" above and the `LIMIT-FN` / `LIMIT-FP` categories in the corpus.
+
+If you find a case the framework mishandles, please open an issue with
+the command and the expected behavior.
+
 ## Usage
 
 See `plugins/guardian-asimov/USAGE.md` for real examples of how the

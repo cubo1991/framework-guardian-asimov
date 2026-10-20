@@ -88,8 +88,7 @@ humano disponible), un modelo puede decidir seguir adelante igual.
 
 Por eso, para la lista cerrada de "operaciones críticas" (`rm -rf`,
 `git push --force`, `DROP DATABASE`, etc.), el framework agrega una
-segunda capa: un **hook técnico** (`hooks/hooks.json` +
-`scripts/guardian-gate.sh`) que Claude Code ejecuta automáticamente
+segunda capa: un **hook técnico** (`scripts/guardian-gate.sh`, registrado en `hooks/hooks.json`) que Claude Code ejecuta automáticamente
 antes de correr cada comando de shell, y que pide confirmación a través
 del sistema de permisos cuando el texto del comando coincide con uno de
 sus patrones — sin depender de que el modelo coopere. En modo
@@ -109,10 +108,10 @@ Es una red de seguridad parcial, no una garantía:
 - Probado en Linux; Windows y macOS sin verificar.
 
 La lista medida de lo que detecta y lo que no está en
-`plugins/guardian-asimov/tests/hook-corpus.txt` (se corre con
-`bash plugins/guardian-asimov/tests/run-hook-corpus.sh`).
+`plugins/guardian-asimov/skills/guardian-risk-gate/evals/hook-corpus.txt` (se corre con
+`bash plugins/guardian-asimov/skills/guardian-risk-gate/evals/run-hook-corpus.sh`).
 
-Ver `constitution.md` (sección 0) para el detalle de esta distinción.
+Ver `references/constitution.md` (sección 0) para el detalle de esta distinción.
 
 ## Estructura del repositorio
 
@@ -121,29 +120,20 @@ framework-guardian-asimov/              # raíz del marketplace
 ├── .claude-plugin/
 │   └── marketplace.json                # catálogo — lista el plugin de abajo
 └── plugins/
-    └── guardian-asimov/                # el plugin en sí
-        ├── .claude-plugin/
-        │   └── plugin.json             # manifest del plugin
-        ├── constitution.md             # filosofía y principios (fuente de verdad)
-        ├── VERSION / CHANGELOG.md / DESIGN.md / ROADMAP.md
-        ├── config/
-        │   └── profiles.md             # Paranoid / Balanced / Expert
-        ├── hooks/
-        │   └── hooks.json              # registra el hook PreToolUse
-        ├── scripts/
-        │   └── guardian-gate.sh        # enforcement técnico de operaciones críticas
-        ├── skills/
-        │   ├── risk-analysis/          # motor de decisión — el núcleo
-        │   ├── filesystem/  ├── database/  ├── git/  ├── shell/
-        │   ├── security/    ├── privacy/   ├── legal/ ├── internet/
-        │   ├── emergency/              # contención post-incidente
-        │   └── decision-log/           # historial de intervenciones
-        └── tests/
-            └── scenarios/              # casos seguros, peligrosos, ambiguos
+    └── guardian-asimov/                # el plugin
+        ├── .claude-plugin/plugin.json  # manifest
+        ├── VERSION / CHANGELOG.md / DESIGN.md / ROADMAP.md / USAGE.md
+        ├── hooks/hooks.json            # registra el hook PreToolUse
+        └── skills/
+            └── guardian-risk-gate/     # EL skill (carpeta autocontenida)
+                ├── SKILL.md            # proceso de decisión
+                ├── references/         # checklists por dominio, perfiles, constitución
+                ├── scripts/            # hook opcional + autodiagnóstico
+                └── evals/              # escenarios y corpus del hook
 ```
 
-Cada módulo en `skills/` es independiente: agregar uno nuevo no
-requiere tocar los existentes. Ver `plugins/guardian-asimov/DESIGN.md`
+Es un único skill: el proceso vive en `SKILL.md` y los detalles por
+dominio se cargan bajo demanda desde `references/` (carga progresiva). Ver `plugins/guardian-asimov/DESIGN.md`
 para el razonamiento completo de esta arquitectura.
 
 ## Uso

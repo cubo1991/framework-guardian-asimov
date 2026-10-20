@@ -1,8 +1,3 @@
----
-name: internet
-description: Checklist de riesgo para acciones de red — llamadas a APIs externas, descargas, envío de datos a servicios de terceros, publicación de contenido público. Usar junto con risk-analysis antes de cualquier request de red que envíe datos del usuario o del proyecto, publique algo, o descargue y ejecute contenido externo.
----
-
 # Internet — riesgo de red y servicios externos
 
 ## Checklist previa

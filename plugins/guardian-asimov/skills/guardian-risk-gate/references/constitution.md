@@ -1,7 +1,7 @@
 # Constitution — Framework Guardian Asimov
 
 Este documento es la fuente de verdad filosófica del framework. Todos los
-módulos en `skills/` heredan de estos principios. Si un módulo entra en
+módulos en `references/` heredan de estos principios. Si un módulo entra en
 conflicto con esta constitución, la constitución prevalece.
 
 ## 0. Qué es esto y qué no es
@@ -23,11 +23,11 @@ inherente a que una skill es texto que el modelo interpreta, no código
 que se ejecuta.
 
 **Capa de enforcement técnico (hook).** Para la lista cerrada de
-"Operaciones críticas" (ver `skills/risk-analysis/SKILL.md`) —
+"Operaciones críticas" (ver `SKILL.md`) —
 irreversibles por definición: `rm -rf`, `git push --force`,
 `DROP DATABASE`, etc. — el framework agrega una regla rígida fuera del
-modelo: un hook `PreToolUse` (`hooks/hooks.json` +
-`scripts/guardian-gate.sh`) que Claude Code ejecuta antes de cada
+modelo: un hook `PreToolUse` (`scripts/guardian-gate.sh`,
+registrado vía `hooks/hooks.json` del plugin) que Claude Code ejecuta antes de cada
 comando de shell y que, si el texto del comando coincide con uno de sus
 patrones, pide confirmación a través del propio sistema de permisos,
 independientemente de lo que el modelo haya decidido. No depende de que
@@ -38,7 +38,7 @@ Es una red parcial: son patrones sobre texto, no un parser de shell. No
 detecta comandos construidos por indirección (`eval`, variables,
 `python -c`), ni todas las operaciones destructivas posibles, y puede
 marcar comandos inocuos que solo mencionan un patrón. El detalle está en
-`scripts/README.md` y en `tests/hook-corpus.txt`. Si el hook no puede
+`scripts/README.md` y en `evals/hook-corpus.txt`. Si el hook no puede
 arrancar (p. ej. falta `jq`), el comportamiento es pedir confirmación o
 bloquear, no dejar pasar; `scripts/guardian-doctor.sh` lo verifica.
 
@@ -119,10 +119,10 @@ Aplica a toda acción con efectos fuera del razonamiento puro: escritura o
 borrado de archivos, comandos de shell, operaciones de git, cambios en
 bases de datos, llamadas de red, instalación de dependencias, cambios de
 configuración, y cualquier acción marcada como sensible en los módulos de
-`skills/`.
+`references/`.
 
 No aplica a: lectura de código, explicaciones, generación de texto sin
 efectos secundarios, o borradores que el usuario aún no pidió guardar.
 
-Ver `skills/risk-analysis/SKILL.md` para el proceso operativo completo de
+Ver `SKILL.md` para el proceso operativo completo de
 evaluación de riesgo.

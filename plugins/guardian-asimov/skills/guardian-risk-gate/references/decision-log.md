@@ -1,11 +1,6 @@
----
-name: decision-log
-description: Mantiene un registro acumulativo de las decisiones que tomó el Framework Guardian Asimov durante el trabajo en el proyecto (intervenciones de riesgo Medio, Alto o Crítico). Usar (1) automáticamente, agregando una entrada, cada vez que risk-analysis clasifique una acción como 🟡🔴⚫ y el usuario decida cómo proceder; (2) cuando el usuario pida ver el historial, con frases como "mostrame el log de decisiones", "qué frenó el framework últimamente", "resumime los riesgos de esta sesión" o "auditá lo que hicimos hoy".
----
-
 # Decision Log — historial de intervenciones
 
-Este módulo complementa a `risk-analysis`: mientras ese motor decide
+Este módulo complementa a `guardian-risk-gate`: mientras ese motor decide
 *en el momento* qué hacer con una acción riesgosa, este módulo se
 encarga de que esa decisión quede **registrada** para poder revisarla
 después — por el propio usuario, por un compañero de equipo, o por
@@ -18,7 +13,7 @@ conversación.
 
 ## Cuándo escribir una entrada
 
-Automáticamente, cada vez que `risk-analysis` clasifique una acción
+Automáticamente, cada vez que `guardian-risk-gate` clasifique una acción
 como 🟡 Medio, 🔴 Alto o ⚫ Crítico **y el usuario ya haya respondido**
 (confirmó, rechazó, o eligió una alternativa). No se registra:
 
@@ -97,8 +92,8 @@ Ante un pedido del usuario tipo "mostrame el log", "qué se frenó
 - No registra el contenido completo de archivos, comandos, ni datos
   sensibles — solo el resumen de la decisión. Si la acción en sí
   involucraba un secreto o dato sensible, el log no debe contener ese
-  valor, solo la mención de que existía el riesgo (ver `skills/security`
-  y `skills/privacy`).
-- No reemplaza `skills/emergency` — si algo ya salió mal, ese es el
+  valor, solo la mención de que existía el riesgo (ver `references/security.md`
+  y `references/privacy.md`).
+- No reemplaza `references/emergency.md` — si algo ya salió mal, ese es el
   módulo que guía la contención; el log solo deja constancia de que
   pasó, después de resuelto.

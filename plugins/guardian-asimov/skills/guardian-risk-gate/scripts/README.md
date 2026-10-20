@@ -8,7 +8,7 @@
 
 Lee el comando que Claude Code está por ejecutar y lo compara contra
 los mismos patrones de "Operaciones críticas" descriptos en
-`skills/risk-analysis/SKILL.md` (`rm -rf`, `git reset --hard`,
+`SKILL.md` (`rm -rf`, `git reset --hard`,
 `git push --force`, `DROP DATABASE`, `TRUNCATE`, `sudo rm`,
 `curl | bash`, `chmod -R 777`, etc.). Si coincide, devuelve
 `permissionDecision: "ask"` — lo que dispara el diálogo de permisos
@@ -46,7 +46,7 @@ Efecto según el modo:
 ## Mantener el patrón sincronizado
 
 Si agregás una operación nueva a la lista de "Operaciones críticas" en
-`skills/risk-analysis/SKILL.md`, sumá también el patrón correspondiente
+`SKILL.md`, sumá también el patrón correspondiente
 en la variable `PATTERN` de `guardian-gate.sh` — son dos listas que
 deben mantenerse alineadas a mano, no hay generación automática entre
 ellas.

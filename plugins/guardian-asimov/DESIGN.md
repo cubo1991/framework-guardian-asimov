@@ -15,13 +15,13 @@ frontmatter. Esto es más escalable y más barato en tokens, y permite que
 cada módulo evolucione (o se agregue uno nuevo) sin tocar los demás —
 principio de abierto/cerrado aplicado a documentación de comportamiento.
 
-## Por qué `risk-analysis` es el núcleo y no un módulo más
+## Por qué `guardian-risk-gate` es el núcleo y no un módulo más
 
 Los módulos de dominio (`git`, `filesystem`, etc.) dan **checklists
 específicas** — qué mirar en ese dominio puntual. Pero la lógica de
 "cómo pasar de una checklist a una decisión" (clasificar, elegir acción,
 formatear el aviso) es la misma para todos los dominios. Ponerla una
-sola vez en `risk-analysis` evita duplicar la misma lógica de decisión
+sola vez en `guardian-risk-gate` evita duplicar la misma lógica de decisión
 diez veces y que se desincronicen entre sí.
 
 ## Por qué la constitución es un documento aparte de las skills
@@ -52,9 +52,9 @@ vuelta atrás. La velocidad que gana `expert` es en fricción para
 riesgos medios/altos reversibles, nunca en la red de seguridad para lo
 irreversible.
 
-## Por qué un módulo `emergency` separado de `risk-analysis`
+## Por qué un módulo `emergency` separado de `guardian-risk-gate`
 
-`risk-analysis` es preventivo: corre antes de actuar. `emergency` es
+`guardian-risk-gate` es preventivo: corre antes de actuar. `emergency` es
 reactivo: corre cuando la prevención falló (o no se pudo evitar el daño
 por una causa externa). Mezclarlos hubiera hecho el módulo de
 prevención más largo y confuso; separarlos deja cada uno enfocado en un
@@ -74,10 +74,10 @@ a varios años y con múltiples colaboradores.
   de gobernanza maduro necesita también un playbook de contención para
   cuando la prevención no alcanza (bugs, errores humanos, fallas
   externas). Se agregó porque es la contraparte natural de
-  `risk-analysis` y evita que, ante un incidente real, el agente
+  `guardian-risk-gate` y evita que, ante un incidente real, el agente
   improvise sin guía.
 - **Principio de "ninguna suposición bajo incertidumbre" como regla
   explícita y transversal**, no solo mencionado una vez — se repite en
-  la constitución y en `risk-analysis` porque es, en la práctica, la
+  la constitución y en `guardian-risk-gate` porque es, en la práctica, la
   falla más común de un agente bien intencionado: rellenar huecos de
   información con el escenario más conveniente en vez de preguntar.

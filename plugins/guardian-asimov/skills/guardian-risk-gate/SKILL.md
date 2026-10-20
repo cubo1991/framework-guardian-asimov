@@ -1,14 +1,32 @@
 ---
-name: risk-analysis
-description: Núcleo del Framework Guardian Asimov. Ejecuta esto ANTES de cualquier acción con efectos reales (escribir/borrar archivos, comandos de shell, git, bases de datos, red, configuración, dependencias). Evalúa riesgo económico, de datos, técnico, de seguridad, legal, reputacional, para terceros y para el propio agente, clasifica el riesgo y decide si proceder, avisar o pedir confirmación. Consultá también el módulo específico (filesystem, git, database, shell, security, privacy, legal, internet) que aplique a la acción concreta, y decision-log para registrar el resultado.
+name: guardian-risk-gate
+description: Evalúa el riesgo ANTES de actuar cuando una acción tiene efectos reales (borrar o sobrescribir archivos, comandos de shell, git, bases de datos, red, dependencias, secretos). Clasifica de 🟢 a ⚫ y decide si proceder, avisar o pedir confirmación. Incluye checklists por dominio y un hook opcional para Claude Code.
+compatibility: Funciona como skill en cualquier agente compatible con Agent Skills. El hook opcional requiere Claude Code, bash y jq.
+metadata:
+  version: "1.4.0"
+  author: David Lopez
 ---
 
-# Risk Analysis — motor de decisión
+# Guardian Risk Gate
 
-Este es el módulo que orquesta todo el framework. Los demás módulos
-(`filesystem`, `git`, `database`, `shell`, `security`, `privacy`, `legal`,
-`internet`, `emergency`) aportan checklists específicas de su dominio;
-este módulo define **cómo se usa esa información para decidir**.
+Proceso de decisión que corre antes de cualquier acción con efectos
+reales. Los checklists por dominio y los principios están en
+`references/`; cargá solo el que aplique a la acción concreta:
+
+| Si la acción toca… | Leer |
+|---|---|
+| archivos / carpetas | `references/filesystem.md` |
+| git | `references/git.md` |
+| bases de datos | `references/database.md` |
+| comandos de shell, sudo, instalación | `references/shell.md` |
+| secretos, credenciales, tokens | `references/security.md` |
+| datos personales | `references/privacy.md` |
+| licencias, regulación | `references/legal.md` |
+| red, APIs, descargas | `references/internet.md` |
+| algo ya salió mal | `references/emergency.md` |
+| registrar la decisión | `references/decision-log.md` |
+| perfiles paranoid / balanced / expert | `references/profiles.md` |
+| principios y reglas de comportamiento | `references/constitution.md` |
 
 ## Cuándo correr este proceso
 
@@ -65,7 +83,7 @@ categoría — nunca se baja por falta de información).
 - **🟢 Bajo** → proceder normalmente, sin comentario adicional.
 - **🟡 Medio** → explicar en 1-2 líneas el impacto posible, y continuar
   (no hace falta esperar confirmación explícita, salvo que el perfil
-  activo sea `paranoid` — ver `config/profiles.md`).
+  activo sea `paranoid` — ver `references/profiles.md`).
 - **🔴 Alto** → explicar qué puede pasar, por qué, cómo se revierte y qué
   alternativa existe. **Pedir confirmación antes de ejecutar.**
 - **⚫ Crítico** → nunca ejecutar de entrada. Explicar el motivo, ofrecer
@@ -93,20 +111,17 @@ reescribir historial de git compartido, borrar ramas remotas.
 
 Estas siempre pasan por el Paso 4 nivel Crítico, sin excepción de
 perfil — ni siquiera el perfil `expert` las salta (ver
-`config/profiles.md` para el detalle de qué sí varía entre perfiles).
+`references/profiles.md` para el detalle de qué sí varía entre perfiles).
 
-**Una parte de esta lista tiene además un hook técnico**
-(`hooks/hooks.json` + `scripts/guardian-gate.sh`) que revisa el texto
-del comando de shell antes de que se ejecute y, si coincide con ciertos
-patrones (`rm -rf` y variantes, `git reset --hard`, `push --force`,
-`DROP`, `DELETE` sin `WHERE`, etc.), fuerza una confirmación a través
-del sistema de permisos de Claude Code. Es una red de seguridad parcial:
-son patrones sobre texto, no un parser de shell; no ve indirección
-(`eval`, variables, `python -c`) y no cubre toda la lista (p. ej. borrar
-con `find -delete`, tocar `.env`, backups). Para lo que el hook no
-detecta, solo cuenta el razonamiento de este módulo. Límites exactos en
-`scripts/README.md` y `tests/hook-corpus.txt` (ver `constitution.md`,
-sección 0).
+**Una parte de esta lista tiene además un hook técnico** opcional
+(`scripts/guardian-gate.sh`, ver `scripts/README.md`) que revisa el
+texto del comando de shell y, si coincide con ciertos patrones (`rm -rf`
+y variantes, `git reset --hard`, `push --force`, `DROP`, `DELETE` sin
+`WHERE`, etc.), fuerza una confirmación a través del sistema de permisos
+de Claude Code. Es una red parcial: patrones sobre texto, sin ver
+indirección (`eval`, variables, `python -c`), y no cubre toda la lista
+(p. ej. `find -delete`, `.env`, backups). Para lo que el hook no
+detecta —o si no está instalado— solo cuenta este razonamiento.
 
 ## Formato de intervención
 
@@ -128,7 +143,7 @@ alcanza una línea de aviso dentro del flujo normal de la respuesta.
 
 Una vez que el usuario respondió a la intervención (confirmó, rechazó,
 o eligió una alternativa), agregar una entrada al log de decisiones —
-ver `skills/decision-log/SKILL.md` para el formato exacto y dónde
+ver `references/decision-log.md` para el formato exacto y dónde
 vive el archivo. No hace falta avisarle al usuario que se registró;
 es un paso silencioso, igual que el resto del framework cuando no hay
 riesgo que comunicar.

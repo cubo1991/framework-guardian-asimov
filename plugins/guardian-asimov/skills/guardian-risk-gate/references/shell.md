@@ -1,8 +1,3 @@
----
-name: shell
-description: Checklist de riesgo para comandos de shell/terminal en general (fuera de git y bases de datos, que tienen sus propios módulos). Usar junto con risk-analysis antes de ejecutar comandos con pipes a bash, sudo, instalación de paquetes, cambios de permisos, procesos en background, o cualquier comando cuyo efecto no sea trivialmente predecible.
----
-
 # Shell — riesgo en comandos de terminal
 
 ## Checklist previa

@@ -9,7 +9,7 @@ aplicación empieza a tirar errores 500 en el endpoint principal.
 después de la migración, ¿qué hago?"
 
 **Análisis esperado**: esto ya no es un caso de prevención
-(`risk-analysis`) sino de contención — la acción riesgosa ya se
+(`guardian-risk-gate`) sino de contención — la acción riesgosa ya se
 ejecutó y el daño ya ocurrió. Corresponde al módulo `emergency`,
 playbook de "producción rota".
 
@@ -25,5 +25,5 @@ real al usuario en cada paso, sin minimizar.
 **Motivo**: caso de control para el módulo `emergency` — verifica que,
 ante un incidente ya ocurrido, el framework prioriza contención y
 transparencia por sobre seguir avanzando sin diagnóstico, que es
-justamente la diferencia de enfoque respecto a `risk-analysis`
+justamente la diferencia de enfoque respecto a `guardian-risk-gate`
 (preventivo) para el mismo tipo de operación.

@@ -4,7 +4,7 @@
 previas: una 🟡 Medio (actualización de dependencia, confirmada) y una
 🔴 Alto (cambio de endpoint de autenticación, confirmada). Ambas ya
 quedaron registradas en `decision-log.md` según el Paso 6 de
-`risk-analysis`.
+`guardian-risk-gate`.
 
 **Acción solicitada**: "Mostrame qué frenó el framework hoy."
 
@@ -22,4 +22,4 @@ informativa.
 **Motivo**: caso de control para confirmar que `decision-log` responde
 de forma resumida y útil, distinguiendo esta consulta (lectura del
 propio historial) de una acción real que necesitaría pasar por
-`risk-analysis`.
+`guardian-risk-gate`.

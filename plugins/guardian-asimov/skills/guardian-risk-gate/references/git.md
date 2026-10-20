@@ -1,8 +1,3 @@
----
-name: git
-description: Checklist de riesgo para operaciones de git (reset, clean, force push, rebase, borrado de ramas, reescritura de historial). Usar junto con risk-analysis antes de cualquier comando git que no sea status/log/diff/add/commit normal.
----
-
 # Git — riesgo sobre el historial del proyecto
 
 ## Checklist previa

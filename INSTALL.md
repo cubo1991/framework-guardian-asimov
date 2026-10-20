@@ -20,12 +20,12 @@ Si `jq` no está instalado, el hook (desde v1.3.1) pide confirmación para
 Después de instalar, verificá que el hook arranca:
 
 ```bash
-bash plugins/guardian-asimov/scripts/guardian-doctor.sh
+bash plugins/guardian-asimov/skills/guardian-risk-gate/scripts/guardian-doctor.sh
 ```
 
 (Si instalaste vía marketplace, el plugin queda en
 `~/.claude/plugins/`; corré el mismo script desde esa ruta.) Más
-detalle en `plugins/guardian-asimov/scripts/README.md`.
+detalle en `plugins/guardian-asimov/skills/guardian-risk-gate/scripts/README.md`.
 
 ## Opción A — Instalar como plugin (recomendada)
 
@@ -109,9 +109,7 @@ copiando archivos a mano:
 
 ```bash
 git clone https://github.com/<tu-usuario>/framework-guardian-asimov.git
-cp -r framework-guardian-asimov/plugins/guardian-asimov/skills/* .claude/skills/
-cp framework-guardian-asimov/plugins/guardian-asimov/constitution.md .claude/
-cp -r framework-guardian-asimov/plugins/guardian-asimov/config .claude/
+cp -r framework-guardian-asimov/plugins/guardian-asimov/skills/guardian-risk-gate .claude/skills/
 ```
 
 Con esta opción no hay auto-update — cada actualización requiere volver

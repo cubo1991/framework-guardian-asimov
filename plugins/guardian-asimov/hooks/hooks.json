@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/guardian-gate.sh\"",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/skills/guardian-risk-gate/scripts/guardian-gate.sh\"",
             "timeout": 10,
             "onFailure": "block"
           }

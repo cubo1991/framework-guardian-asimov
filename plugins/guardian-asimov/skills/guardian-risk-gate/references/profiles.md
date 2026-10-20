@@ -45,7 +45,7 @@ fricción, sin perder la red de seguridad para lo irreversible.
 
 ## Qué nunca cambia entre perfiles
 
-- La lista de "operaciones críticas" de `skills/risk-analysis/SKILL.md`
+- La lista de "operaciones críticas" de `SKILL.md`
   siempre exige confirmación explícita.
 - La transparencia sobre qué se hizo y por qué nunca se reduce.
 - Nunca se exponen secretos/credenciales reales, en ningún perfil.

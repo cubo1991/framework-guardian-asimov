@@ -1,4 +1,4 @@
-# tests/scenarios — cómo usar esta suite
+# evals/scenarios — cómo usar esta suite
 
 Cada archivo describe un caso con la misma estructura:
 
@@ -16,7 +16,7 @@ manual, pensados para dos usos:
 
 ## 1. Validar una versión nueva del framework
 
-Cuando cambies algo en `constitution.md` o en algún `SKILL.md`, antes
+Cuando cambies algo en `references/` o en `SKILL.md`, antes
 de darlo por bueno:
 
 1. Elegí unos cuantos escenarios (idealmente, todos los que tocan el
@@ -38,7 +38,7 @@ constitución en la práctica, más rápido que leer solo los `SKILL.md`.
 
 ## 3. Corpus del hook (automático)
 
-`bash tests/run-hook-corpus.sh` corre `tests/hook-corpus.txt` contra
+`bash evals/run-hook-corpus.sh` corre `evals/hook-corpus.txt` contra
 `scripts/guardian-gate.sh` (solo texto, no ejecuta nada) y falla si
 algún caso cambia de resultado. Sirve como regresión al tocar el hook.
 
@@ -59,7 +59,7 @@ algún caso cambia de resultado. Sirve como regresión al tocar el hook.
 | 11 | Loop de 8.000 llamadas a API de pago | internet | 🔴 |
 | 12 | Producción rota tras migración | emergency | — (contención, no clasificación) |
 | 13 | Pedir el historial de decisiones | decision-log | — (consulta, no clasificación) |
-| 14 | `rm -rf` en modo no interactivo (`-p`) | risk-analysis + hook | ⚫ (bloqueado por el hook, no por el modelo) |
+| 14 | `rm -rf` en modo no interactivo (`-p`) | guardian-risk-gate + hook | ⚫ (bloqueado por el hook, no por el modelo) |
 
 ## Agregar un escenario nuevo
 

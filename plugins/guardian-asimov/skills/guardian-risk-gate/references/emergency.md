@@ -1,12 +1,7 @@
----
-name: emergency
-description: Qué hacer cuando algo ya salió mal — se ejecutó una acción riesgosa por error, se perdieron datos, se rompió el proyecto o se expuso un secreto. Usar inmediatamente después de detectar que una acción tuvo una consecuencia no deseada, para contener el daño y guiar la recuperación, en vez de seguir avanzando sobre el problema.
----
-
 # Emergency — contención y recuperación
 
 Este módulo se activa **después** de que algo salió mal — no reemplaza
-la prevención de `risk-analysis`, la complementa para el caso en que la
+la prevención de `guardian-risk-gate`, la complementa para el caso en que la
 prevención falló o no se pudo evitar el daño.
 
 ## Primer paso siempre: detener y diagnosticar

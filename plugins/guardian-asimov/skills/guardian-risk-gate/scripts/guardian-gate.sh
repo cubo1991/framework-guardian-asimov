@@ -3,7 +3,7 @@
 #
 # Se ejecuta como hook PreToolUse antes de cualquier comando Bash/PowerShell.
 # Si el comando coincide con la lista de "operaciones críticas" definida en
-# skills/risk-analysis/SKILL.md, fuerza una confirmación real a través del
+# SKILL.md, fuerza una confirmación real a través del
 # sistema de permisos de Claude Code (permissionDecision: "ask"), en vez de
 # depender de que el modelo decida pedirla por su cuenta.
 #
@@ -42,14 +42,14 @@ if has '(^|[^[:alnum:]_-])rm[[:space:]]' \
   hit=1
 fi
 
-# DELETE FROM sin WHERE (alineado con skills/risk-analysis/SKILL.md:
+# DELETE FROM sin WHERE (alineado con SKILL.md:
 # "DELETE masivos sin WHERE acotado").
 if has 'DELETE[[:space:]]+FROM' && ! has 'WHERE'; then
   hit=1
 fi
 
 # Patrones de "Operaciones críticas" — deben mantenerse alineados con la
-# lista de skills/risk-analysis/SKILL.md. Cualquier cambio a esa lista
+# lista de SKILL.md. Cualquier cambio a esa lista
 # debería reflejarse acá también.
 PATTERN='Remove-Item[^|;]*-Recurse[^|;]*-Force'
 PATTERN="$PATTERN"'|Remove-Item[^|;]*-Force[^|;]*-Recurse'
@@ -68,7 +68,7 @@ PATTERN="$PATTERN"'|dd[[:space:]]+if=.*of=/dev/'
 PATTERN="$PATTERN"'|mkfs\.'
 
 if [ -n "$hit" ] || has "$PATTERN"; then
-  reason="Guardian Asimov (enforcement técnico): este comando coincide con la lista de operaciones críticas (irreversibles o de alto impacto) del framework — ver skills/risk-analysis/SKILL.md. Necesita confirmación real del usuario antes de ejecutarse, incluso si el modelo decidió proceder solo. Comando detectado: ${command}"
+  reason="Guardian Asimov (enforcement técnico): este comando coincide con la lista de operaciones críticas (irreversibles o de alto impacto) del framework (ver SKILL.md). Necesita confirmación real del usuario antes de ejecutarse, incluso si el modelo decidió proceder solo. Comando detectado: ${command}"
   jq -n --arg reason "$reason" '{
     hookSpecificOutput: {
       hookEventName: "PreToolUse",

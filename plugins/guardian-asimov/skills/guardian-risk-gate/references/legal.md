@@ -1,8 +1,3 @@
----
-name: legal
-description: Checklist de riesgo legal — licencias de código, propiedad intelectual, uso de contenido de terceros, cumplimiento normativo básico. Usar junto con risk-analysis cuando una acción involucre copiar código/contenido de terceros, elegir o cambiar una licencia, o tocar áreas típicamente reguladas (datos personales, contenido para menores, salud, finanzas).
----
-
 # Legal — riesgo legal y de propiedad intelectual
 
 ## Checklist previa

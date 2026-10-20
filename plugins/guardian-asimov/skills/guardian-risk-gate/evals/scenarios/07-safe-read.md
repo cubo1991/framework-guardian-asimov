@@ -10,7 +10,7 @@ efecto secundario — no escribe, no borra, no ejecuta nada, no envía
 datos a ningún lado.
 
 **Decisión esperada**: 🟢 Bajo, y de hecho ni siquiera corresponde
-correr el proceso completo de `risk-analysis` — está fuera del alcance
+correr el proceso completo de `guardian-risk-gate` — está fuera del alcance
 definido en la constitución (aplica solo a acciones con efectos
 reales). Proceder a explicar directamente.
 

@@ -10,7 +10,7 @@
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 gate="$root/scripts/guardian-gate.sh"
-hooks="$root/hooks/hooks.json"
+hooks="$root/../../hooks/hooks.json"   # hooks.json del plugin (si el skill se usa suelto, no existe)
 problems=0
 
 ok()   { printf 'OK    %s\n' "$1"; }
@@ -22,7 +22,7 @@ if command -v jq >/dev/null 2>&1; then ok "jq disponible"; else fail "jq NO estÃ
 
 # 2. Archivos
 [ -f "$gate" ]  && ok "existe scripts/guardian-gate.sh" || fail "falta scripts/guardian-gate.sh"
-[ -f "$hooks" ] && ok "existe hooks/hooks.json" || fail "falta hooks/hooks.json"
+if [ -f "$hooks" ]; then ok "existe hooks/hooks.json del plugin"; else echo "AVISO hooks/hooks.json no existe (uso como skill suelto: el hook no estÃ¡ registrado)"; fi
 
 # 3. hooks.json bien formado y con el comando esperado
 if command -v jq >/dev/null 2>&1 && [ -f "$hooks" ]; then

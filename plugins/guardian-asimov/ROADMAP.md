@@ -38,7 +38,7 @@ Ideas para futuras versiones, sin comprometer la filosofía central.
 ## Largo plazo
 
 - **Escala de confianza explícita**: hoy la "confianza de la
-  evaluación" es parte del razonamiento interno de `risk-analysis`; se
+  evaluación" es parte del razonamiento interno de `guardian-risk-gate`; se
   podría hacer explícita como un cuarto eje reportado al usuario
   ("evalúo esto con confianza media porque no tengo visibilidad de X").
 - **Extensión a otros dominios de riesgo** que puedan surgir con el

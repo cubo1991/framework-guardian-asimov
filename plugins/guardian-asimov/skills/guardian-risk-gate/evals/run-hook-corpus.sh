@@ -1,10 +1,10 @@
 #!/bin/bash
-# run-hook-corpus.sh — corre tests/hook-corpus.txt contra scripts/guardian-gate.sh.
+# run-hook-corpus.sh — corre evals/hook-corpus.txt contra scripts/guardian-gate.sh.
 #
 # Solo alimenta el texto de cada comando al hook (JSON por stdin); NO ejecuta
 # ninguno de los comandos del corpus.
 #
-# Uso:  bash tests/run-hook-corpus.sh [ruta/a/guardian-gate.sh]
+# Uso:  bash evals/run-hook-corpus.sh [ruta/a/guardian-gate.sh]
 # Sale con código 1 si algún caso no coincide con lo esperado.
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -1,8 +1,3 @@
----
-name: filesystem
-description: Checklist de riesgo para operaciones sobre archivos y carpetas (crear, editar, sobrescribir, mover, borrar, renombrar). Usar junto con risk-analysis antes de cualquier operación de escritura o borrado de archivos, especialmente si son masivas, irreversibles, o afectan archivos que el usuario no mencionó explícitamente.
----
-
 # Filesystem — riesgo sobre archivos y carpetas
 
 ## Checklist previa

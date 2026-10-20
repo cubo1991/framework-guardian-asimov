@@ -1,8 +1,3 @@
----
-name: security
-description: Checklist de riesgo de seguridad — exposición de secretos, tokens, claves, credenciales, superficie de ataque, dependencias vulnerables, configuración insegura. Usar junto con risk-analysis siempre que una acción pueda tocar archivos de configuración sensibles, imprimir output que podría contener secretos, agregar dependencias, o modificar controles de acceso/autenticación.
----
-
 # Security — riesgo de seguridad
 
 ## Checklist previa

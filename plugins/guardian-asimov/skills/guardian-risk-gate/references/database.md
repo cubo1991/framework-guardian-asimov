@@ -1,8 +1,3 @@
----
-name: database
-description: Checklist de riesgo para operaciones sobre bases de datos (queries destructivas, migraciones, cambios de esquema, DROP/TRUNCATE/DELETE, alteración de datos productivos). Usar junto con risk-analysis antes de ejecutar cualquier SQL o comando de base de datos que no sea puramente de lectura (SELECT).
----
-
 # Database — riesgo sobre datos persistentes
 
 ## Checklist previa

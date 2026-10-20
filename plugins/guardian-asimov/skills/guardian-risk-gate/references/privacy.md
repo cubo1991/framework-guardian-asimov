@@ -1,8 +1,3 @@
----
-name: privacy
-description: Checklist de riesgo de privacidad — manejo de datos personales de usuarios/clientes, PII, datos que no deberían salir del entorno del usuario, envío de información a servicios externos. Usar junto con risk-analysis cuando una acción involucre datos de personas reales, o el envío de cualquier dato a una API/servicio de terceros.
----
-
 # Privacy — riesgo de privacidad
 
 ## Checklist previa

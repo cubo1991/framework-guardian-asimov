@@ -2,7 +2,7 @@
 
 El framework no se "invoca" manualmente en general — Claude Code lo
 consulta solo cuando la tarea coincide con la descripción de alguno de
-los módulos en `skills/`. Igual, se puede pedir explícitamente:
+los checklists en `references/`. Igual, se puede pedir explícitamente:
 
 - *"Corré un análisis Guardian Asimov antes de hacer esto."*
 - *"¿Qué riesgo tiene esta operación según el framework?"*
@@ -11,7 +11,7 @@ los módulos en `skills/`. Igual, se puede pedir explícitamente:
 
 1. El usuario pide una acción con efectos reales (editar, borrar,
    ejecutar, pushear, etc.).
-2. Claude Code identifica que aplica `risk-analysis` (y el módulo de
+2. Claude Code identifica que aplica `guardian-risk-gate` (y el módulo de
    dominio correspondiente: `git`, `filesystem`, `database`, etc.).
 3. Evalúa las ocho dimensiones de riesgo y clasifica: 🟢🟡🔴⚫.
 4. Según el nivel (y el perfil activo, ver `config/profiles.md`):
@@ -64,7 +64,7 @@ que haga falta pedirlo. Para consultarlo:
 
 Si el archivo todavía no existe (no hubo intervenciones que registrar
 en el proyecto), Claude lo dice directamente en vez de inventar
-contenido. Ver `skills/decision-log/SKILL.md` para el formato exacto
+contenido. Ver `references/decision-log.md` para el formato exacto
 de cada entrada.
 
 ## Cambiar de perfil

@@ -1,58 +1,59 @@
-# ROADMAP.md — mejoras futuras propuestas
+# ROADMAP.md — proposed future improvements
 
-Ideas para futuras versiones, sin comprometer la filosofía central.
+Ideas for future versions, without compromising the core philosophy.
 
-## Corto plazo
+## Short term
 
-- **Puerto PowerShell puro para `guardian-gate`** (implementado
-  parcialmente en v1.3.0 vía Git Bash): un `.ps1` nativo para
-  Windows sin Git Bash instalado — ver limitación conocida en
-  `plugins/guardian-asimov/scripts/README.md`.
-- **Módulo `dependencies`**: checklist específica para agregar/actualizar
-  paquetes (hoy repartida entre `security` y `legal`) — mantenimiento del
-  paquete, popularidad, vulnerabilidades conocidas, breaking changes de
-  versión mayor.
-- **Módulo `infra`**: separar de `shell`/`internet` lo específico de
-  infraestructura como código (Terraform, Docker, CI/CD) — riesgos como
-  destruir recursos en la nube, cambiar pipelines de deploy.
-- **Plantilla de `CLAUDE.md`** lista para pegar, con la sección del
-  framework ya redactada, para bajar la fricción de instalación.
+- **Pure PowerShell port of `guardian-gate`** (partially covered since
+  v1.3.0 via Git Bash): a native `.ps1` for Windows without Git Bash —
+  see the known limitation in
+  `skills/guardian-risk-gate/scripts/README.md`.
+- **`dependencies` reference**: specific checklist for adding/updating
+  packages (today split between `security` and `legal`) — package
+  maintenance, popularity, known vulnerabilities, major-version breaking
+  changes.
+- **`infra` reference**: split infrastructure-as-code specifics
+  (Terraform, Docker, CI/CD) out of `shell`/`internet` — risks such as
+  destroying cloud resources or changing deploy pipelines.
+- **Ready-to-paste `CLAUDE.md` template** with the framework section
+  already written, to lower installation friction.
 
-## Mediano plazo
+## Medium term
 
-- **Extender el hook a vectores no-shell**: hoy `guardian-gate.sh` solo
-  cubre `Bash`/`PowerShell`. Una operación crítica hecha vía un MCP
-  server (ej. un tool que ejecuta SQL directo) no pasa por este hook
-  todavía — solo por la capa de razonamiento (`skills/database`).
-- **Perfil por proyecto vs. perfil por sesión**: permitir que el perfil
-  activo se declare en `config/profiles.md` de forma persistente por
-  proyecto, y también se pueda overridear solo para la sesión actual.
-- **Integración con `tests/scenarios/`** como suite real ejecutable
-  (hoy son casos documentados en markdown para revisión manual/con
-  subagentes) — correrlos automáticamente contra una versión nueva del
-  framework antes de adoptarla, para detectar regresiones de criterio.
-- **Rotación del `decision-log.md`** (implementado en v1.2.0): si el
-  archivo crece mucho con el tiempo, definir una convención de archivo
-  por mes/trimestre en vez de un único archivo indefinido.
+- **Extend the hook to non-shell vectors**: today `guardian-gate.sh`
+  only covers `Bash`/`PowerShell`. A critical operation done through an
+  MCP server (e.g. a tool that runs SQL directly) does not go through
+  this hook yet — only through the reasoning layer
+  (`references/database.md`).
+- **Per-project vs. per-session profile**: let the active profile be
+  declared persistently per project, and also overridden for the current
+  session only.
+- **Make `evals/scenarios/` an executable suite** (today they are
+  documented markdown cases for manual review / subagent review) — run
+  them automatically against a new framework version before adopting it,
+  to detect regressions in judgment.
+- **`decision-log.md` rotation**: if the file grows a lot over time,
+  define a per-month/quarter file convention instead of a single
+  indefinite file.
 
-## Largo plazo
+## Long term
 
-- **Escala de confianza explícita**: hoy la "confianza de la
-  evaluación" es parte del razonamiento interno de `risk-analysis`; se
-  podría hacer explícita como un cuarto eje reportado al usuario
-  ("evalúo esto con confianza media porque no tengo visibilidad de X").
-- **Extensión a otros dominios de riesgo** que puedan surgir con el
-  tiempo (ej. IA generativa dentro del propio proyecto, contenido
-  producido para usuarios finales, riesgos de accesibilidad) si
-  aparecen como necesidad recurrente.
-- **Modo de auditoría retrospectiva**: correr el framework no antes de
-  actuar sino sobre un historial de acciones ya tomadas (ej. un rango de
-  commits), para señalar retroactivamente qué operaciones deberían
-  haber pasado por confirmación y no lo hicieron.
+- **Explicit confidence scale**: today the "confidence of the
+  assessment" is part of the internal reasoning; it could be made
+  explicit as a fourth axis reported to the user ("I'm assessing this
+  with medium confidence because I have no visibility into X").
+- **Extension to other risk domains** that may emerge over time (e.g.
+  generative AI inside the project itself, content produced for end
+  users, accessibility risks) if they appear as a recurring need.
+- **Retrospective audit mode**: run the framework not before acting but
+  over a history of actions already taken (e.g. a range of commits), to
+  flag retroactively which operations should have gone through
+  confirmation and did not.
 
-## Principio para evaluar cualquier propuesta futura
+## Principle for evaluating any future proposal
 
-Toda extensión debe poder explicarse en una frase apuntando a alguno de
-los principios de `constitution.md`. Si una mejora propuesta no reduce
-riesgo real ni mejora la transparencia/reversibilidad, probablemente no
-pertenece a este framework sino a otra parte del proyecto.
+Every extension must be explainable in one sentence pointing to one of
+the principles in `references/constitution.md`. If a proposed
+improvement neither reduces real risk nor improves
+transparency/reversibility, it probably does not belong in this
+framework but elsewhere in the project.

@@ -1,158 +1,150 @@
 # Framework Guardian Asimov
 
-Capa de gobernanza y análisis de riesgos para Claude Code. Analiza toda
-acción con efectos reales antes de ejecutarla, y decide si procede sola,
-si avisa, o si se detiene a pedir confirmación — sin frenar el trabajo
-normal.
+A governance and risk-analysis layer for AI coding agents. It analyzes
+every action with real-world effects before executing it, and decides
+whether to proceed on its own, warn, or stop and ask for confirmation —
+without slowing down normal work.
 
-Este repositorio es, a la vez, **el marketplace** y **el plugin**: se
-instala directamente en Claude Code con `/plugin install`, sin copiar
-archivos a mano.
+It ships as **one skill**, `guardian-risk-gate`, plus an optional Claude
+Code hook. This repository is both **the marketplace** and **the
+plugin**: it installs directly in Claude Code with `/plugin install`,
+with no manual file copying.
 
-## Instalación rápida (por proyecto)
+## Quick install (per project)
 
-Desde Claude Code, en el proyecto donde lo quieras usar — son **dos
-comandos separados**, cada uno con su propio Enter, no se pegan juntos:
+From Claude Code, in the project where you want to use it — these are
+**two separate commands**, each with its own Enter, not pasted together:
 
 ```
 /plugin marketplace add cubo1991/framework-guardian-asimov
 ```
 
-Esperá a que confirme que agregó el marketplace, y recién ahí:
+Wait for it to confirm the marketplace was added, and only then:
 
 ```
 /plugin install guardian-asimov@guardian-asimov-marketplace
 ```
 
-Con eso alcanza — las skills quedan disponibles solo en ese proyecto,
-y Claude Code las consulta cuando corresponde, según el `description`
-de cada una.
+That's enough — the skill is available only in that project, and Claude
+Code consults it when appropriate, based on its `description`.
 
-## Instalación global (todos tus proyectos)
+## Global install (all your projects)
 
-Si no querés repetir la instalación en cada proyecto, agregá `--scope
-user` al primer comando — así el marketplace queda registrado a nivel
-de tu usuario, no atado a la carpeta donde lo corriste:
+If you don't want to repeat the installation in every project, add
+`--scope user` to the first command — the marketplace is then
+registered at your user level, not tied to the folder where you ran it:
 
 ```
 /plugin marketplace add cubo1991/framework-guardian-asimov --scope user
 ```
 
-Escribilo completo en una sola línea (no lo escribas dentro del cuadro
-interactivo de "Add Marketplace" — ese cuadro solo acepta la fuente
-`owner/repo`, sin flags). Cuando confirme, instalá el plugin igual que
-antes:
+Type it in full on a single line (not inside the interactive "Add
+Marketplace" box — that box only accepts the `owner/repo` source, with
+no flags). When it confirms, install the plugin as before:
 
 ```
 /plugin install guardian-asimov@guardian-asimov-marketplace
 ```
 
-Al quedar en scope `user`, no hace falta repetir el `marketplace add`
-en cada proyecto nuevo — ya está disponible para vos en cualquiera.
-Para confirmar que quedó global:
+At `user` scope you don't need to repeat `marketplace add` in each new
+project. To confirm it is global:
 
 ```
 /plugin marketplace list --json
 ```
 
-Deberías ver `guardian-asimov-marketplace` sin estar atado a una
-carpeta puntual de proyecto.
+You should see `guardian-asimov-marketplace` not tied to a specific
+project folder.
 
-## Actualizar
+## Updating
 
-Cada vez que se suban cambios nuevos al repo:
+Whenever new changes are pushed to the repo:
 
 ```
 /plugin marketplace update guardian-asimov-marketplace
 ```
 
-Ver `INSTALL.md` para el detalle completo, incluyendo la opción de
-instalación manual (sin marketplace) para quien prefiera copiar
-archivos directamente.
+See `INSTALL.md` for full details, including the manual installation
+option (no marketplace) for those who prefer copying files directly.
 
-## Qué es
+## What it is
 
-Un agente que puede editar código, correr comandos de shell, tocar
-bases de datos y hacer git push tiene mucho poder. Guardian Asimov es
-la capa que se pregunta, antes de cada acción con consecuencias reales:
-*¿esto puede salir mal, para quién, y qué tan grave sería?* — y actúa
-en consecuencia.
+An agent that can edit code, run shell commands, touch databases and
+`git push` has a lot of power. Guardian Risk Gate is the layer that
+asks itself, before every action with real consequences: *can this go
+wrong, for whom, and how badly?* — and acts accordingly.
 
-## Dos capas: razonamiento + enforcement técnico
+## Two layers: reasoning + technical enforcement
 
-Para la mayoría de las decisiones, Guardian Asimov es una **skill** —
-guía de comportamiento que el modelo interpreta y sigue. Eso funciona
-bien en una sesión normal, con vos presente para responder. Pero una
-skill no es un control técnico: en modo no interactivo (`-p`, sin
-humano disponible), un modelo puede decidir seguir adelante igual.
+For most decisions, Guardian Risk Gate is a **skill** — behavioral
+guidance the model interprets and follows. That works well in a normal
+session, with you present to answer. But a skill is not a technical
+control: in non-interactive mode (`-p`, no human available), a model can
+decide to go ahead anyway.
 
-Por eso, para la lista cerrada de "operaciones críticas" (`rm -rf`,
-`git push --force`, `DROP DATABASE`, etc.), el framework agrega una
-segunda capa: un **hook técnico** (`hooks/hooks.json` +
-`scripts/guardian-gate.sh`) que Claude Code ejecuta automáticamente
-antes de correr cada comando de shell, y que pide confirmación a través
-del sistema de permisos cuando el texto del comando coincide con uno de
-sus patrones — sin depender de que el modelo coopere. En modo
-desatendido, sin nadie para confirmar, la acción queda sin ejecutar.
+So, for the closed list of "critical operations" (`rm -rf`,
+`git push --force`, `DROP DATABASE`, etc.), the framework adds a second
+layer: a **technical hook** (`scripts/guardian-gate.sh`, registered in
+`hooks/hooks.json`) that Claude Code runs automatically before each
+shell command, and that asks for confirmation through the permission
+system when the command text matches one of its patterns — without
+depending on the model cooperating. In unattended mode, with nobody to
+confirm, the action is left unexecuted.
 
-### Qué NO hace el hook
+### What the hook does NOT do
 
-Es una red de seguridad parcial, no una garantía:
+It is a partial safety net, not a guarantee:
 
-- Son patrones regex sobre el texto del comando, no un parser de shell.
-- No ve indirección: `eval`, variables, `python -c`, scripts descargados.
-- No cubre toda la lista de operaciones críticas (p. ej. `find -delete`,
-  `git checkout -- .`, `terraform destroy`, `kubectl delete`, tocar
-  `.env` o backups) ni acciones hechas por otras herramientas (MCP, edición de archivos).
-- Puede marcar comandos inocuos que solo mencionan un patrón (un
-  mensaje de commit, un `grep`).
-- Probado en Linux; Windows y macOS sin verificar.
+- It is regex over the command text, not a shell parser.
+- It cannot see indirection: `eval`, variables, `python -c`, downloaded
+  scripts.
+- It does not cover the whole critical operations list (e.g.
+  `find -delete`, `git checkout -- .`, `terraform destroy`,
+  `kubectl delete`, touching `.env` or backups) nor actions done through
+  other tools (MCP, file edits).
+- It can flag harmless commands that merely mention a pattern (a commit
+  message, a `grep`).
+- Tested on Linux; Windows and macOS not verified.
 
-La lista medida de lo que detecta y lo que no está en
-`plugins/guardian-asimov/tests/hook-corpus.txt` (se corre con
-`bash plugins/guardian-asimov/tests/run-hook-corpus.sh`).
+The measured list of what it detects and what it doesn't is in
+`plugins/guardian-asimov/skills/guardian-risk-gate/evals/hook-corpus.txt`
+(run it with
+`bash plugins/guardian-asimov/skills/guardian-risk-gate/evals/run-hook-corpus.sh`).
 
-Ver `constitution.md` (sección 0) para el detalle de esta distinción.
+See `references/constitution.md` (section 0) for the detail of this
+distinction.
 
-## Estructura del repositorio
+## Repository structure
 
 ```
-framework-guardian-asimov/              # raíz del marketplace
+framework-guardian-asimov/              # marketplace root
 ├── .claude-plugin/
-│   └── marketplace.json                # catálogo — lista el plugin de abajo
+│   └── marketplace.json                # catalog — lists the plugin below
 └── plugins/
-    └── guardian-asimov/                # el plugin en sí
-        ├── .claude-plugin/
-        │   └── plugin.json             # manifest del plugin
-        ├── constitution.md             # filosofía y principios (fuente de verdad)
-        ├── VERSION / CHANGELOG.md / DESIGN.md / ROADMAP.md
-        ├── config/
-        │   └── profiles.md             # Paranoid / Balanced / Expert
-        ├── hooks/
-        │   └── hooks.json              # registra el hook PreToolUse
-        ├── scripts/
-        │   └── guardian-gate.sh        # enforcement técnico de operaciones críticas
-        ├── skills/
-        │   ├── risk-analysis/          # motor de decisión — el núcleo
-        │   ├── filesystem/  ├── database/  ├── git/  ├── shell/
-        │   ├── security/    ├── privacy/   ├── legal/ ├── internet/
-        │   ├── emergency/              # contención post-incidente
-        │   └── decision-log/           # historial de intervenciones
-        └── tests/
-            └── scenarios/              # casos seguros, peligrosos, ambiguos
+    └── guardian-asimov/                # the plugin
+        ├── .claude-plugin/plugin.json  # manifest
+        ├── VERSION / CHANGELOG.md / DESIGN.md / ROADMAP.md / USAGE.md
+        ├── hooks/hooks.json            # registers the PreToolUse hook
+        └── skills/
+            └── guardian-risk-gate/     # THE skill (self-contained folder)
+                ├── SKILL.md            # decision process
+                ├── references/         # per-domain checklists, profiles, constitution
+                ├── scripts/            # optional hook + self-diagnosis
+                └── evals/              # scenarios and hook corpus
 ```
 
-Cada módulo en `skills/` es independiente: agregar uno nuevo no
-requiere tocar los existentes. Ver `plugins/guardian-asimov/DESIGN.md`
-para el razonamiento completo de esta arquitectura.
+It is a single skill: the process lives in `SKILL.md` and the
+per-domain details are loaded on demand from `references/` (progressive
+disclosure). See `plugins/guardian-asimov/DESIGN.md` for the full
+reasoning behind this architecture.
 
-## Uso
+## Usage
 
-Ver `plugins/guardian-asimov/USAGE.md` para ejemplos reales de cómo
-interviene el framework en distintos escenarios.
+See `plugins/guardian-asimov/USAGE.md` for real examples of how the
+framework intervenes in different scenarios.
 
-## Filosofía en una frase
+## Philosophy in one sentence
 
-Elegir siempre la alternativa menos riesgosa que igual cumple el
-objetivo, avisando cuando corresponde y deteniéndose solo cuando el
-riesgo lo amerita — nunca por default, nunca en silencio.
+Always choose the least risky alternative that still achieves the goal,
+warning when appropriate and stopping only when the risk warrants it —
+never by default, never silently.

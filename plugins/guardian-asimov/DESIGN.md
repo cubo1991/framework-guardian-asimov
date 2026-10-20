@@ -1,83 +1,82 @@
-# DESIGN.md — decisiones de diseño
+# DESIGN.md — design decisions
 
-## Por qué skills modulares y no un solo archivo
+## Why one skill with `references/` instead of eleven skills (v1.4.0)
 
-Un único archivo gigante con todas las reglas tiene dos problemas: (1)
-siempre está en contexto, incluso cuando la tarea es "leé este archivo y
-explicame qué hace" — puro ruido; (2) mantenerlo es frágil, cualquier
-cambio en la sección de git puede pisar accidentalmente la de bases de
-datos si todo vive junto.
+Until v1.3.1 every domain (`git`, `filesystem`, `database`, …) was its
+own skill. That made the plugin hard to ship and discover as a single
+product, and the model had to decide among eleven overlapping
+descriptions. v1.4.0 folds everything into one skill, `guardian-risk-gate`:
 
-Separar en skills por dominio (`filesystem`, `git`, `database`, ...)
-aprovecha la carga progresiva: Claude Code solo trae al contexto el
-módulo relevante para la tarea actual, según el `description` del
-frontmatter. Esto es más escalable y más barato en tokens, y permite que
-cada módulo evolucione (o se agregue uno nuevo) sin tocar los demás —
-principio de abierto/cerrado aplicado a documentación de comportamiento.
+- `SKILL.md` holds the decision process (under 200 lines) and is the
+  only thing loaded when the skill triggers.
+- `references/` holds the per-domain checklists, the profiles and the
+  constitution. `SKILL.md` tells the agent which one to open, so only
+  the relevant domain enters the context (progressive disclosure,
+  references one level deep).
+- `scripts/` and `evals/` are not loaded into context; they are tooling.
 
-## Por qué `risk-analysis` es el núcleo y no un módulo más
+The skill folder is self-contained, so it can be zipped and used on its
+own in any agent that supports Agent Skills. The Claude Code plugin is a
+thin wrapper that adds `hooks/hooks.json`.
 
-Los módulos de dominio (`git`, `filesystem`, etc.) dan **checklists
-específicas** — qué mirar en ese dominio puntual. Pero la lógica de
-"cómo pasar de una checklist a una decisión" (clasificar, elegir acción,
-formatear el aviso) es la misma para todos los dominios. Ponerla una
-sola vez en `risk-analysis` evita duplicar la misma lógica de decisión
-diez veces y que se desincronicen entre sí.
+## Why the decision process is the core and the domains are references
 
-## Por qué la constitución es un documento aparte de las skills
+The domain references (`git`, `filesystem`, etc.) provide **specific
+checklists** — what to look at in that domain. But the logic of "how to
+go from a checklist to a decision" (classify, choose an action, format
+the warning) is the same for all domains. Writing it once in `SKILL.md`
+avoids duplicating the same decision logic ten times and having the
+copies drift apart.
 
-`constitution.md` no tiene frontmatter de skill (no dispara
-automáticamente) porque es más una referencia de fondo que un
-disparador de acción — se espera que se cargue una vez al iniciar el
-proyecto (vía `CLAUDE.md`/instrucciones de proyecto), no que se
-re-consulte en cada tarea. Las skills operativas son las que hacen el
-trabajo pesado en el momento.
+## Why the constitution is a separate document
 
-## Por qué tres perfiles y no una escala continua
+`references/constitution.md` is a background reference rather than an
+action trigger — the agent reads it when it needs the rationale, not on
+every task. `SKILL.md` does the heavy lifting at decision time.
 
-Una escala continua (ej. "nivel de paranoia del 1 al 10") suena más
-flexible pero en la práctica nadie recuerda qué significa "nivel 6", y
-es difícil de documentar de forma consistente. Tres perfiles con nombre
-y semántica clara (`Paranoid`/`Balanced`/`Expert`) son más fáciles de
-razonar, comunicar y auditar. Si en el futuro se necesita más
-granularidad, es más fácil partir de estos tres que de una escala
-arbitraria (ver `ROADMAP.md`).
+## Why three profiles and not a continuous scale
 
-## Por qué las operaciones críticas no varían por perfil
+A continuous scale (e.g. "paranoia level 1 to 10") sounds more flexible,
+but in practice nobody remembers what "level 6" means, and it is hard to
+document consistently. Three named profiles with clear semantics
+(`Paranoid`/`Balanced`/`Expert`) are easier to reason about, communicate
+and audit. If more granularity is needed in the future, it is easier to
+start from these three than from an arbitrary scale (see `ROADMAP.md`).
 
-Si `expert` pudiera saltarse confirmación en operaciones irreversibles
-(DROP DATABASE, force push a main, rm -rf), el framework dejaría de
-cumplir su función principal para el único tipo de daño que no tiene
-vuelta atrás. La velocidad que gana `expert` es en fricción para
-riesgos medios/altos reversibles, nunca en la red de seguridad para lo
-irreversible.
+## Why critical operations do not vary by profile
 
-## Por qué un módulo `emergency` separado de `risk-analysis`
+If `expert` could skip confirmation on irreversible operations (DROP
+DATABASE, force push to main, rm -rf), the framework would stop doing
+its main job for the one kind of damage that cannot be undone. What
+`expert` gains is less friction for reversible medium/high risks, never
+the safety net for what is irreversible.
 
-`risk-analysis` es preventivo: corre antes de actuar. `emergency` es
-reactivo: corre cuando la prevención falló (o no se pudo evitar el daño
-por una causa externa). Mezclarlos hubiera hecho el módulo de
-prevención más largo y confuso; separarlos deja cada uno enfocado en un
-momento distinto del ciclo de vida de una acción.
+## Why the `emergency` reference is separate from the decision process
 
-## Sobre el "no busques minimizar el número de archivos"
+The decision process is preventive: it runs before acting. `emergency`
+is reactive: it runs when prevention failed (or the damage could not be
+avoided for an external reason). Mixing them would have made the
+prevention process longer and more confusing; separating them keeps each
+focused on a different moment in an action's lifecycle.
 
-Se priorizó tener un archivo por responsabilidad clara (un dominio, una
-skill) sobre comprimir todo en menos archivos. El costo es más archivos
-para navegar; el beneficio es que cada uno se puede leer, entender y
-modificar de forma aislada, que es lo que hace sostenible un proyecto
-a varios años y con múltiples colaboradores.
+## Why the hook is optional and described as a partial net
 
-## Qué se agregó más allá del pedido original
+A skill is text the model interprets; in unattended mode it can be
+ignored. The hook adds a technical brake for the patterns it recognizes,
+but it is regex over command text, not a shell parser: it cannot see
+indirection and it does not cover the whole critical list. The docs say
+so explicitly, and `evals/hook-corpus.txt` records exactly what is and
+is not detected, so the claim stays measurable.
 
-- **`emergency`**: el pedido cubre bien la prevención, pero un framework
-  de gobernanza maduro necesita también un playbook de contención para
-  cuando la prevención no alcanza (bugs, errores humanos, fallas
-  externas). Se agregó porque es la contraparte natural de
-  `risk-analysis` y evita que, ante un incidente real, el agente
-  improvise sin guía.
-- **Principio de "ninguna suposición bajo incertidumbre" como regla
-  explícita y transversal**, no solo mencionado una vez — se repite en
-  la constitución y en `risk-analysis` porque es, en la práctica, la
-  falla más común de un agente bien intencionado: rellenar huecos de
-  información con el escenario más conveniente en vez de preguntar.
+## What was added beyond the original request
+
+- **`emergency`**: the request covers prevention well, but a mature
+  governance framework also needs a containment playbook for when
+  prevention is not enough (bugs, human error, external failures). It is
+  the natural counterpart of the decision process and keeps the agent
+  from improvising without guidance during a real incident.
+- **"No assumptions under uncertainty" as an explicit, cross-cutting
+  rule**, not mentioned just once — it is repeated in the constitution
+  and in `SKILL.md` because it is, in practice, the most common failure
+  of a well-intentioned agent: filling information gaps with the most
+  convenient scenario instead of asking.

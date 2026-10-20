@@ -1,6 +1,7 @@
 ---
 name: guardian-risk-gate
 description: Assesses risk BEFORE acting whenever an action has real-world effects (deleting or overwriting files, shell commands, git, databases, network calls, dependencies, secrets). Classifies it from 🟢 to ⚫ and decides whether to proceed, warn, or ask for confirmation. Includes per-domain checklists and an optional Claude Code hook.
+license: MIT
 compatibility: Works as a skill in any agent that supports Agent Skills. The optional hook requires Claude Code, bash and jq.
 metadata:
   version: "1.4.0"

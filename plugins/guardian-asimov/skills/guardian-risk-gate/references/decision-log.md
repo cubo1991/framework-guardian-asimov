@@ -1,99 +1,94 @@
-# Decision Log — historial de intervenciones
+# Decision Log — history of interventions
 
-Este módulo complementa a `guardian-risk-gate`: mientras ese motor decide
-*en el momento* qué hacer con una acción riesgosa, este módulo se
-encarga de que esa decisión quede **registrada** para poder revisarla
-después — por el propio usuario, por un compañero de equipo, o por
-vos mismo en una sesión futura.
+This module complements `guardian-risk-gate`: while that engine decides
+*in the moment* what to do with a risky action, this module makes sure
+that decision is **recorded** so it can be reviewed later — by the user,
+by a teammate, or by you in a future session.
 
-No reemplaza la intervención en el chat (el aviso/confirmación sigue
-pasando igual, en línea, como siempre) — el log es un registro
-adicional en paralelo, silencioso, que no agrega fricción a la
-conversación.
+It does not replace the intervention in the chat (the warning/
+confirmation still happens inline, as always) — the log is an
+additional, silent record in parallel that adds no friction to the
+conversation.
 
-## Cuándo escribir una entrada
+## When to write an entry
 
-Automáticamente, cada vez que `guardian-risk-gate` clasifique una acción
-como 🟡 Medio, 🔴 Alto o ⚫ Crítico **y el usuario ya haya respondido**
-(confirmó, rechazó, o eligió una alternativa). No se registra:
+Automatically, whenever `guardian-risk-gate` classifies an action as
+🟡 Medium, 🔴 High or ⚫ Critical **and the user has already responded**
+(confirmed, declined, or chose an alternative). Not recorded:
 
-- Riesgo 🟢 Bajo (no hay intervención real que registrar).
-- El momento del aviso en sí — se espera la resolución, para que la
-  entrada quede completa con lo que finalmente pasó.
+- 🟢 Low risk (no real intervention to record).
+- The moment of the warning itself — wait for the resolution, so the
+  entry is complete with what finally happened.
 
-## Dónde vive el archivo
+## Where the file lives
 
-`decision-log.md` en la raíz del proyecto donde se está trabajando (no
-dentro de la carpeta del plugin). Si no existe, se crea la primera vez
-que hace falta escribir una entrada, con el encabezado mínimo:
-
-```markdown
-# Decision Log — Framework Guardian Asimov
-
-Registro de intervenciones de riesgo Medio, Alto o Crítico.
-```
-
-Si el proyecto usa control de versiones, este archivo puede
-versionarse (da contexto histórico útil al equipo) o excluirse vía
-`.gitignore` si el usuario prefiere mantenerlo local — no asumir, y si
-surge la duda, preguntar una sola vez y no volver a interrumpir por
-esto.
-
-## Formato de cada entrada
+`decision-log.md` at the root of the project being worked on (not
+inside the plugin folder). If it does not exist, it is created the
+first time an entry needs to be written, with the minimal header:
 
 ```markdown
-## [YYYY-MM-DD HH:MM] Nivel — resumen corto de la acción
+# Decision Log — Guardian Risk Gate
 
-- **Módulo(s)**: git, filesystem, ...
-- **Qué se pidió**: descripción breve de la acción solicitada
-- **Riesgo detectado**: una línea con el motivo de la clasificación
-- **Alternativa ofrecida**: si hubo una (o "ninguna" si no aplicaba)
-- **Resolución**: confirmado / rechazado / se usó la alternativa / se
-  pidió más información
+Record of Medium, High or Critical risk interventions.
 ```
 
-Ejemplo real:
+If the project uses version control, this file can be versioned (it
+gives the team useful historical context) or excluded via `.gitignore`
+if the user prefers to keep it local — don't assume; if in doubt, ask
+once and don't interrupt again about it.
+
+## Format of each entry
 
 ```markdown
-## [2026-08-07 15:12] 🔴 Alto — cambio de proveedor de autenticación
+## [YYYY-MM-DD HH:MM] Level — short summary of the action
 
-- **Módulo(s)**: security
-- **Qué se pidió**: cambiar el endpoint de login para usar un nuevo proveedor
-- **Riesgo detectado**: afecta el login de todos los usuarios actuales
-- **Alternativa ofrecida**: probar primero con un usuario de test
-- **Resolución**: confirmado, se aplicó a todos directamente
+- **Module(s)**: git, filesystem, ...
+- **What was asked**: brief description of the requested action
+- **Risk detected**: one line with the reason for the classification
+- **Alternative offered**: if there was one (or "none" if not applicable)
+- **Resolution**: confirmed / declined / alternative used / more
+  information requested
 ```
 
-Mantener cada entrada corta — 4-5 líneas. El log es para escanear
-rápido, no para reconstruir la conversación entera.
+Real example:
 
-## Cuándo leer y resumir el log
+```markdown
+## [2026-08-07 15:12] 🔴 High — change of authentication provider
 
-Ante un pedido del usuario tipo "mostrame el log", "qué se frenó
-últimamente", "auditá esta sesión/semana/proyecto":
+- **Module(s)**: security
+- **What was asked**: change the login endpoint to use a new provider
+- **Risk detected**: affects login for all current users
+- **Alternative offered**: try with a test user first
+- **Resolution**: confirmed, applied to everyone directly
+```
 
-1. Leer `decision-log.md`.
-2. Si no existe todavía, decirlo directamente ("todavía no hay
-   entradas registradas en este proyecto") en vez de inventar
-   contenido.
-3. Si existe, resumir — no pegar el archivo completo salvo que el
-   usuario pida verlo entero. Priorizar: cuántas entradas hay, cuántas
-   fueron Crítico vs Alto vs Medio, y si hay algún patrón (ej. "la
-   mayoría de las intervenciones fueron por operaciones de git en la
-   rama main").
-4. Si el usuario pide filtrar por fecha, módulo o nivel, hacerlo sobre
-   el contenido ya leído.
+Keep each entry short — 4–5 lines. The log is for quick scanning, not
+for reconstructing the whole conversation.
 
-## Qué NO hace este módulo
+## When to read and summarize the log
 
-- No es un sistema de auditoría de seguridad externo ni de
-  cumplimiento normativo — es una bitácora simple para uso del propio
-  usuario/equipo.
-- No registra el contenido completo de archivos, comandos, ni datos
-  sensibles — solo el resumen de la decisión. Si la acción en sí
-  involucraba un secreto o dato sensible, el log no debe contener ese
-  valor, solo la mención de que existía el riesgo (ver `references/security.md`
-  y `references/privacy.md`).
-- No reemplaza `references/emergency.md` — si algo ya salió mal, ese es el
-  módulo que guía la contención; el log solo deja constancia de que
-  pasó, después de resuelto.
+When the user asks things like "show me the log", "what got stopped
+lately", "audit this session/week/project":
+
+1. Read `decision-log.md`.
+2. If it doesn't exist yet, say so directly ("there are no entries
+   recorded in this project yet") instead of inventing content.
+3. If it exists, summarize — don't paste the whole file unless the
+   user asks to see it all. Prioritize: how many entries there are, how
+   many were Critical vs High vs Medium, and whether there is a pattern
+   (e.g. "most interventions were for git operations on main").
+4. If the user asks to filter by date, module or level, do it on the
+   content already read.
+
+## What this module does NOT do
+
+- It is not an external security-audit or regulatory-compliance system
+  — it is a simple log for the user's/team's own use.
+- It does not record the full contents of files, commands, or sensitive
+  data — only the summary of the decision. If the action itself
+  involved a secret or sensitive data, the log must not contain that
+  value, only the mention that the risk existed (see
+  `references/security.md` and `references/privacy.md`).
+- It does not replace `references/emergency.md` — if something has
+  already gone wrong, that is the module that guides containment; the
+  log only records that it happened, once resolved.

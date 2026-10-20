@@ -1,18 +1,18 @@
 #!/bin/bash
-# run-hook-corpus.sh — corre evals/hook-corpus.txt contra scripts/guardian-gate.sh.
+# run-hook-corpus.sh — runs evals/hook-corpus.txt against scripts/guardian-gate.sh.
 #
-# Solo alimenta el texto de cada comando al hook (JSON por stdin); NO ejecuta
-# ninguno de los comandos del corpus.
+# It only feeds each command's text to the hook (JSON on stdin); it does NOT
+# execute any of the corpus commands.
 #
-# Uso:  bash evals/run-hook-corpus.sh [ruta/a/guardian-gate.sh]
-# Sale con código 1 si algún caso no coincide con lo esperado.
+# Usage:  bash evals/run-hook-corpus.sh [path/to/guardian-gate.sh]
+# Exits 1 if any case does not match the expectation.
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 gate="${1:-$here/../scripts/guardian-gate.sh}"
 corpus="$here/hook-corpus.txt"
 
-command -v jq >/dev/null 2>&1 || { echo "ERROR: se necesita jq para correr el corpus." >&2; exit 2; }
-[ -f "$gate" ] || { echo "ERROR: no existe $gate" >&2; exit 2; }
+command -v jq >/dev/null 2>&1 || { echo "ERROR: jq is required to run the corpus." >&2; exit 2; }
+[ -f "$gate" ] || { echo "ERROR: $gate does not exist" >&2; exit 2; }
 
 declare -A total ok
 fail=0
@@ -32,17 +32,17 @@ while IFS= read -r line || [ -n "$line" ]; do
     ok[$cat_]=$(( ${ok[$cat_]:-0} + 1 ))
   else
     fail=$(( fail + 1 ))
-    printf 'DIFERENTE [%s] esperado=%s real=%s :: %s\n' "$cat_" "$expected" "$got" "$cmd"
+    printf 'DIFFERENT [%s] expected=%s actual=%s :: %s\n' "$cat_" "$expected" "$got" "$cmd"
   fi
 done < "$corpus"
 
-echo "--- resumen por categoría (coinciden / total)"
-for c in TP VARIANTE CORREGIDO CONTROL LIMITE-FN LIMITE-FP; do
+echo "--- summary by category (matching / total)"
+for c in TP VARIANT FIXED CONTROL LIMIT-FN LIMIT-FP; do
   [ -n "${total[$c]:-}" ] && printf '%-10s %s/%s\n' "$c" "${ok[$c]:-0}" "${total[$c]}"
 done
 
 if [ "$fail" -gt 0 ]; then
-  echo "FALLÓ: $fail caso(s) distinto(s) de lo esperado."
+  echo "FAILED: $fail case(s) differ from the expectation."
   exit 1
 fi
-echo "OK: todos los casos coinciden con lo esperado."
+echo "OK: all cases match the expectation."

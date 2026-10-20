@@ -1,54 +1,52 @@
-# Privacy — riesgo de privacidad
+# Privacy — privacy risk
 
-## Checklist previa
+## Pre-check
 
-- ¿Los datos involucrados son de **personas reales** (usuarios, clientes,
-  empleados) y no datos sintéticos/de prueba?
-- ¿La acción **envía datos a un servicio externo** (API de terceros,
-  webhook, servicio de IA)?
-- ¿Se están **combinando o cruzando** datos de formas que aumentan lo
-  identificable de una persona (deanonimización)?
-- ¿Los datos se van a **loguear o persistir** en un lugar más amplio de
-  lo necesario (logs compartidos, archivos temporales, historial)?
-- ¿Hay una base legal o consentimiento razonable para este uso del dato,
-  hasta donde se sabe?
+- Is the data about **real people** (users, customers, employees)
+  rather than synthetic/test data?
+- Does the action **send data to an external service** (third-party
+  API, webhook, AI service)?
+- Is data being **combined or cross-referenced** in ways that make a
+  person more identifiable (de-anonymization)?
+- Will the data be **logged or persisted** somewhere broader than
+  necessary (shared logs, temp files, history)?
+- Is there a legal basis or reasonable consent for this use of the
+  data, as far as is known?
 
-## Clasificación rápida
+## Quick classification
 
-- 🟢 Trabajar con datos sintéticos, anonimizados, o del propio usuario
-  sobre sí mismo.
-- 🟡 Procesar datos personales dentro del entorno local del usuario, sin
-  enviarlos a servicios externos.
-- 🔴 Enviar datos personales a un servicio de terceros (incluida una API
-  de IA) sin que quede claro si el usuario tiene autorización para
-  hacerlo; loguear PII en un log persistente y compartido.
-- ⚫ Publicar o exponer datos personales de terceros (clientes, usuarios
-  finales) de forma pública o accesible más allá de lo previsto;
-  combinar datasets de forma que identifique a personas que se esperaba
-  que quedaran anónimas.
+- 🟢 Working with synthetic or anonymized data, or the user's own data
+  about themselves.
+- 🟡 Processing personal data inside the user's local environment,
+  without sending it to external services.
+- 🔴 Sending personal data to a third-party service (including an AI
+  API) when it is unclear whether the user is authorized to do so;
+  logging PII in a persistent, shared log.
+- ⚫ Publishing or exposing third parties' personal data (customers,
+  end users) publicly or accessibly beyond what was intended; combining
+  datasets in a way that identifies people who were expected to remain
+  anonymous.
 
-## Reglas específicas
+## Specific rules
 
-1. **Minimización por default**: si una tarea puede hacerse con menos
-   datos personales (una muestra, campos anonimizados), preferir esa
-   versión y ofrecerla como opción.
-2. **Antes de mandar datos a un servicio externo**, señalar qué datos
-   salen y a dónde, especialmente si son de terceros y no del propio
-   usuario.
-3. **Logs y archivos temporales**: evitar que datos personales queden
-   en logs de debug o archivos que el usuario no revisó que se estén
-   creando.
-4. **No asumir consentimiento** para usos secundarios de datos de
-   clientes del usuario (por ejemplo, usar una base de emails de
-   clientes para algo distinto de lo que fue recolectada) — señalarlo
-   si se detecta.
+1. **Minimization by default**: if a task can be done with less
+   personal data (a sample, anonymized fields), prefer that version and
+   offer it as an option.
+2. **Before sending data to an external service**, state what data
+   leaves and where it goes, especially if it belongs to third parties
+   and not to the user.
+3. **Logs and temp files**: avoid personal data ending up in debug logs
+   or files the user has not reviewed are being created.
+4. **Don't assume consent** for secondary uses of the user's
+   customers' data (e.g. using a customer email list for something
+   other than what it was collected for) — flag it if detected.
 
-## Ejemplo de intervención
+## Example intervention
 
-> Usuario: "Mandale este CSV de clientes a la API de OpenAI para
-> clasificar sentimiento de comentarios."
-> Framework: 🔴 Alto — el CSV tiene nombre, email y comentario de
-> clientes reales; enviarlo a un servicio externo implica que esos datos
-> salen del control del usuario. Alternativa: mandar solo la columna de
-> comentario (sin nombre/email), que alcanza para clasificar sentimiento
-> igual. ¿Vamos por esa versión?
+> User: "Send this customer CSV to the OpenAI API to classify comment
+> sentiment."
+> Framework: 🔴 High — the CSV has real customers' name, email and
+> comment; sending it to an external service means that data leaves the
+> user's control. Alternative: send only the comment column (without
+> name/email), which is enough to classify sentiment anyway. Shall we
+> go with that version?

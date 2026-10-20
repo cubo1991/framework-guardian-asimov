@@ -1,60 +1,58 @@
-# Emergency — contención y recuperación
+# Emergency — containment and recovery
 
-Este módulo se activa **después** de que algo salió mal — no reemplaza
-la prevención de `guardian-risk-gate`, la complementa para el caso en que la
-prevención falló o no se pudo evitar el daño.
+This module activates **after** something has gone wrong — it does not
+replace the prevention of `guardian-risk-gate`; it complements it for
+the case where prevention failed or the damage could not be avoided.
 
-## Primer paso siempre: detener y diagnosticar
+## Always the first step: stop and diagnose
 
-Ante la señal de que algo salió mal (error inesperado, archivo
-faltante, build roto, dato perdido, secreto expuesto):
+On a sign that something went wrong (unexpected error, missing file,
+broken build, lost data, exposed secret):
 
-1. **Parar** — no seguir ejecutando más acciones sobre el mismo sistema
-   hasta entender el alcance del problema.
-2. **Decir claramente qué pasó**, sin minimizar ni exagerar.
-3. **Evaluar el alcance real** antes de proponer una solución (¿es
-   recuperable? ¿cuánto se perdió? ¿hay una copia en algún lado?).
+1. **Stop** — don't keep executing more actions on the same system
+   until you understand the scope of the problem.
+2. **State clearly what happened**, without minimizing or exaggerating.
+3. **Assess the real scope** before proposing a fix (is it
+   recoverable? how much was lost? is there a copy somewhere?).
 
-## Playbooks por tipo de incidente
+## Playbooks by incident type
 
-### Pérdida de archivos/código
-- Revisar si está en git (`git reflog`, stash, ramas) — muchas
-  "pérdidas" son recuperables desde el historial.
-- Revisar backups del sistema o del editor (autosave, `.bak`).
-- Si es irrecuperable, decirlo directamente y ayudar a reconstruir lo
-  posible a partir de lo que sí queda (logs, documentación, memoria de
-  la conversación).
+### Lost files/code
+- Check whether it is in git (`git reflog`, stash, branches) — many
+  "losses" are recoverable from history.
+- Check system or editor backups (autosave, `.bak`).
+- If it is unrecoverable, say so directly and help rebuild what can be
+  rebuilt from what remains (logs, documentation, the conversation).
 
-### Base de datos dañada
-- Si hay backup: guiar la restauración paso a paso, confirmando el
-  backup correcto antes de sobrescribir el estado actual dañado.
-- Si no hay backup: evaluar si los datos se pueden reconstruir desde
-  otra fuente (logs de aplicación, caché, sistema externo).
+### Damaged database
+- If there is a backup: guide the restore step by step, confirming the
+  correct backup before overwriting the current damaged state.
+- If there is no backup: assess whether the data can be rebuilt from
+  another source (application logs, cache, an external system).
 
-### Secreto/credencial expuesta
-- Prioridad inmediata: **rotar la credencial** (generar una nueva e
-  invalidar la vieja) — esto importa más que "limpiar" el lugar donde
-  se expuso, porque una vez vista no se puede garantizar que no fue
-  copiada.
-- Después, remover el secreto del lugar donde quedó expuesto (código,
-  logs, historial de git si corresponde).
+### Exposed secret/credential
+- Immediate priority: **rotate the credential** (generate a new one and
+  invalidate the old one) — this matters more than "cleaning" the place
+  where it was exposed, because once seen it cannot be guaranteed it
+  was not copied.
+- Then remove the secret from where it was exposed (code, logs, git
+  history if applicable).
 
-### Producción rota
-- Priorizar **volver al último estado funcional conocido** (rollback)
-  sobre intentar arreglar en caliente, salvo que el rollback también
-  sea riesgoso.
-- Comunicar el estado real: qué está roto, desde cuándo, qué se está
-  haciendo.
+### Broken production
+- Prioritize **returning to the last known working state** (rollback)
+  over trying to fix it live, unless the rollback is also risky.
+- Communicate the real state: what is broken, since when, what is being
+  done.
 
-### Push force que pisó trabajo ajeno
-- Buscar el commit perdido vía `reflog` en la máquina de quien lo tenía,
-  si es posible.
-- Avisar cuanto antes a las personas afectadas — cuanto más tiempo pasa,
-  más difícil es recuperar si alguien más siguió trabajando encima.
+### Force push that overwrote someone else's work
+- Look for the lost commit via `reflog` on the machine of whoever had
+  it, if possible.
+- Notify the affected people as soon as possible — the more time passes,
+  the harder recovery is if someone kept working on top.
 
-## Principio general de este módulo
+## General principle of this module
 
-En una emergencia, la prioridad cambia de "prevenir" a "contener y
-recuperar el máximo posible", pero la transparencia total con el usuario
-se mantiene igual o más estricta que en el flujo normal: nunca ocultar
-ni suavizar el alcance real de un incidente.
+In an emergency the priority shifts from "prevent" to "contain and
+recover as much as possible", but full transparency with the user stays
+the same or gets stricter than in the normal flow: never hide or soften
+the real scope of an incident.

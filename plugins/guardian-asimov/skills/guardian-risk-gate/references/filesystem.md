@@ -1,51 +1,51 @@
-# Filesystem — riesgo sobre archivos y carpetas
+# Filesystem — risk on files and folders
 
-## Checklist previa
+## Pre-check
 
-- ¿La operación **borra** o **sobrescribe** contenido existente sin que
-  el usuario lo haya pedido explícitamente para ese archivo puntual?
-- ¿Afecta **más archivos** de los que el usuario mencionó (glob amplio,
-  carpeta entera, `find ... -delete`)?
-- ¿El archivo tiene **valor** que no es obvio recrear (código no
-  versionado, datos generados, config manual, archivo subido por el
-  usuario)?
-- ¿Hay backup, versión en git, o alguna copia previa?
-- ¿La operación es **reversible** (papelera, git) o **permanente**?
+- Does the operation **delete** or **overwrite** existing content
+  without the user having explicitly asked for that specific file?
+- Does it affect **more files** than the user mentioned (broad glob,
+  whole folder, `find ... -delete`)?
+- Does the file have **value** that is not obvious to recreate
+  (unversioned code, generated data, manual config, a user-uploaded
+  file)?
+- Is there a backup, a version in git, or any earlier copy?
+- Is the operation **reversible** (trash, git) or **permanent**?
 
-## Clasificación rápida
+## Quick classification
 
-- 🟢 Crear un archivo nuevo; editar un archivo versionado en git con
-  cambios acotados y pedidos explícitamente.
-- 🟡 Sobrescribir un archivo completo (no un edit puntual) aunque esté
-  en git; renombrar/mover archivos.
-- 🔴 Borrar un archivo no versionado o sin backup; operaciones sobre
-  varios archivos a la vez sin listar cuáles.
-- ⚫ Borrado recursivo (`rm -rf`, borrar una carpeta completa), borrar
-  o sobrescribir backups, borrar algo fuera del directorio de trabajo
-  del proyecto.
+- 🟢 Creating a new file; editing a git-tracked file with narrow
+  changes the user explicitly asked for.
+- 🟡 Overwriting a whole file (not a targeted edit) even if it is in
+  git; renaming/moving files.
+- 🔴 Deleting an unversioned file or one without a backup; operations
+  on several files at once without listing which.
+- ⚫ Recursive deletion (`rm -rf`, deleting a whole folder), deleting or
+  overwriting backups, deleting anything outside the project's working
+  directory.
 
-## Reglas específicas
+## Specific rules
 
-1. **Preferir el cambio mínimo.** Un `str_replace`/edit puntual es
-   siempre mejor que reescribir el archivo entero, aunque el resultado
-   final sea "el mismo": reescribir pierde formato, comentarios,
-   permisos, y aumenta la superficie de error.
-2. **Nunca borrar sin listar qué se borra.** Antes de un borrado
-   múltiple, mostrar la lista real de archivos afectados (`ls`/`find`
-   en modo dry-run), no solo el patrón.
-3. **Preferir mover a un `.bak`/papelera sobre borrar** cuando el
-   usuario no fue explícito en que quiere borrado permanente.
-4. **Fuera del proyecto = siempre confirmar.** Cualquier ruta que
-   escape del directorio de trabajo actual (`../`, rutas absolutas del
-   home, `/etc`, etc.) sube automáticamente a 🔴 como mínimo.
-5. **Archivos grandes o binarios** (assets, media, dumps): confirmar
-   antes de sobrescribir, porque no son fáciles de reconstruir a mano.
+1. **Prefer the minimal change.** A targeted `str_replace`/edit is
+   always better than rewriting the whole file, even if the end result
+   is "the same": rewriting loses formatting, comments and permissions,
+   and increases the surface for error.
+2. **Never delete without listing what is being deleted.** Before a
+   multi-file deletion, show the real list of affected files (`ls`/`find`
+   in dry-run mode), not just the pattern.
+3. **Prefer moving to a `.bak`/trash over deleting** when the user was
+   not explicit that they want permanent deletion.
+4. **Outside the project = always confirm.** Any path that escapes the
+   current working directory (`../`, absolute paths in the home folder,
+   `/etc`, etc.) automatically rises to 🔴 at minimum.
+5. **Large or binary files** (assets, media, dumps): confirm before
+   overwriting, because they are not easy to rebuild by hand.
 
-## Ejemplo de intervención
+## Example intervention
 
-> Usuario: "Limpiá la carpeta `build/` y `dist/`."
-> Framework: 🟡 Medio — `dist/` y `build/` suelen ser artefactos
-> regenerables (se recrean con el build), así que borrarlos es de bajo
-> riesgo real, pero aviso igual: si alguno tiene algo hecho a mano que
-> no está en git, se pierde. ¿Confirmás que ambas carpetas son 100%
-> generadas por build?
+> User: "Clean up the `build/` and `dist/` folders."
+> Framework: 🟡 Medium — `dist/` and `build/` are usually regenerable
+> artifacts (recreated by the build), so deleting them is low real
+> risk, but I'm flagging it anyway: if either holds something made by
+> hand that is not in git, it is lost. Do you confirm both folders are
+> 100% build output?

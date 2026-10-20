@@ -1,66 +1,66 @@
 #!/bin/bash
-# guardian-doctor.sh — autodiagnóstico del hook de Guardian Asimov.
+# guardian-doctor.sh — self-diagnosis for the Guardian Risk Gate hook.
 #
-# Comprueba, sin ejecutar ningún comando peligroso, que el hook puede arrancar
-# tal como lo registra hooks/hooks.json y que responde como se espera.
-# Detecta fallas silenciosas (script no invocable, jq ausente, JSON roto).
+# Checks, without running any dangerous command, that the hook can start as
+# registered in hooks/hooks.json and responds as expected.
+# Detects silent failures (script not invocable, jq missing, broken JSON).
 #
-# Uso:  bash scripts/guardian-doctor.sh
-# Sale con código 0 si todo está bien y 1 si hay algún problema.
+# Usage:  bash scripts/guardian-doctor.sh
+# Exits 0 if everything is fine and 1 if there is any problem.
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 gate="$root/scripts/guardian-gate.sh"
-hooks="$root/../../hooks/hooks.json"   # hooks.json del plugin (si el skill se usa suelto, no existe)
+hooks="$root/../../hooks/hooks.json"   # the plugin's hooks.json (absent if the skill is used standalone)
 problems=0
 
 ok()   { printf 'OK    %s\n' "$1"; }
-fail() { printf 'FALLA %s\n' "$1"; problems=$(( problems + 1 )); }
+fail() { printf 'FAIL  %s\n' "$1"; problems=$(( problems + 1 )); }
 
-# 1. Dependencias
-command -v bash >/dev/null 2>&1 && ok "bash disponible" || fail "bash no disponible"
-if command -v jq >/dev/null 2>&1; then ok "jq disponible"; else fail "jq NO está instalado: el hook va a pedir confirmación para todo comando (ver INSTALL.md)"; fi
+# 1. Dependencies
+command -v bash >/dev/null 2>&1 && ok "bash available" || fail "bash not available"
+if command -v jq >/dev/null 2>&1; then ok "jq available"; else fail "jq is NOT installed: the hook will ask for confirmation on every command (see INSTALL.md)"; fi
 
-# 2. Archivos
-[ -f "$gate" ]  && ok "existe scripts/guardian-gate.sh" || fail "falta scripts/guardian-gate.sh"
-if [ -f "$hooks" ]; then ok "existe hooks/hooks.json del plugin"; else echo "AVISO hooks/hooks.json no existe (uso como skill suelto: el hook no está registrado)"; fi
+# 2. Files
+[ -f "$gate" ]  && ok "scripts/guardian-gate.sh exists" || fail "scripts/guardian-gate.sh is missing"
+if [ -f "$hooks" ]; then ok "the plugin hooks/hooks.json exists"; else echo "NOTE  hooks/hooks.json not found (standalone skill use: the hook is not registered)"; fi
 
-# 3. hooks.json bien formado y con el comando esperado
+# 3. hooks.json well-formed and with the expected command
 if command -v jq >/dev/null 2>&1 && [ -f "$hooks" ]; then
   if jq -e . "$hooks" >/dev/null 2>&1; then
-    ok "hooks.json es JSON válido"
+    ok "hooks.json is valid JSON"
     cmd=$(jq -r '.hooks.PreToolUse[0].hooks[0].command // empty' "$hooks")
     case "$cmd" in
-      bash*) ok "el hook se invoca con 'bash' (no depende del bit de ejecución)" ;;
-      *)     fail "el comando del hook no empieza con 'bash': $cmd" ;;
+      bash*) ok "the hook is invoked with 'bash' (does not depend on the execute bit)" ;;
+      *)     fail "the hook command does not start with 'bash': $cmd" ;;
     esac
     [ "$(jq -r '.hooks.PreToolUse[0].hooks[0].onFailure // empty' "$hooks")" = "block" ] \
-      && ok "onFailure=block: si el hook falla, el comando se bloquea" \
-      || fail "falta onFailure=block en hooks.json: un fallo del hook dejaría pasar el comando"
+      && ok "onFailure=block: if the hook fails, the command is blocked" \
+      || fail "onFailure=block is missing in hooks.json: a hook failure would let the command through"
   else
-    fail "hooks.json no es JSON válido"
+    fail "hooks.json is not valid JSON"
   fi
 fi
 
-# 4. Respuesta del hook (solo pasa texto; no se ejecuta ningún comando)
+# 4. Hook response (only text is passed; no command is executed)
 if [ -f "$gate" ] && command -v jq >/dev/null 2>&1; then
   danger=$(printf '%s' '{"tool_input":{"command":"rm -rf /tmp/guardian-doctor-prueba"}}' | bash "$gate" 2>/dev/null)
   if printf '%s' "$danger" | grep -q '"permissionDecision": *"ask"'; then
-    ok "un comando crítico de prueba dispara la confirmación"
+    ok "a critical test command triggers the confirmation"
   else
-    fail "un comando crítico de prueba NO disparó la confirmación"
+    fail "a critical test command did NOT trigger the confirmation"
   fi
   safe=$(printf '%s' '{"tool_input":{"command":"ls -la"}}' | bash "$gate" 2>/dev/null)
   if [ -z "$safe" ]; then
-    ok "un comando normal pasa sin pedir confirmación"
+    ok "a normal command passes without asking for confirmation"
   else
-    fail "un comando normal disparó una confirmación"
+    fail "a normal command triggered a confirmation"
   fi
 fi
 
 echo
 if [ "$problems" -eq 0 ]; then
-  echo "Todo en orden."
+  echo "All good."
   exit 0
 fi
-echo "Se encontraron $problems problema(s)."
+echo "$problems problem(s) found."
 exit 1

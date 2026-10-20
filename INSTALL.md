@@ -1,87 +1,84 @@
-# Instalación
+# Installation
 
-## Requisito: `jq`
+## Requirement: `jq`
 
-A partir de v1.3.0 el framework incluye un hook técnico
-(`hooks/hooks.json` + `scripts/guardian-gate.sh`) que necesita `bash` y
-`jq` en el entorno donde corre Claude Code. Si no lo tenés:
+Since v1.3.0 the framework includes a technical hook
+(`hooks/hooks.json` + `scripts/guardian-gate.sh`) that needs `bash` and
+`jq` in the environment where Claude Code runs. If you don't have it:
 
 ```bash
 # macOS
 brew install jq
 # Debian/Ubuntu
 sudo apt install jq
-# Windows (con Chocolatey)
+# Windows (with Chocolatey)
 choco install jq
 ```
 
-Si `jq` no está instalado, el hook (desde v1.3.1) pide confirmación para
-**todos** los comandos de shell, para no dejar pasar nada en silencio.
-Después de instalar, verificá que el hook arranca:
+If `jq` is not installed, the hook (since v1.3.1) asks for confirmation
+on **every** shell command, so nothing slips through silently. After
+installing, check that the hook starts:
 
 ```bash
 bash plugins/guardian-asimov/skills/guardian-risk-gate/scripts/guardian-doctor.sh
 ```
 
-(Si instalaste vía marketplace, el plugin queda en
-`~/.claude/plugins/`; corré el mismo script desde esa ruta.) Más
-detalle en `plugins/guardian-asimov/skills/guardian-risk-gate/scripts/README.md`.
+(If you installed via the marketplace, the plugin lives under
+`~/.claude/plugins/`; run the same script from that path.) More detail in
+`plugins/guardian-asimov/skills/guardian-risk-gate/scripts/README.md`.
 
-## Opción A — Instalar como plugin (recomendada)
+## Option A — Install as a plugin (recommended)
 
-Desde dentro de Claude Code, en cualquier proyecto donde lo quieras
-usar:
+From inside Claude Code, in any project where you want to use it:
 
 ```
-/plugin marketplace add <tu-usuario>/framework-guardian-asimov
+/plugin marketplace add <your-user>/framework-guardian-asimov
 /plugin install guardian-asimov@guardian-asimov-marketplace
 ```
 
-Si el resumen de instalación dice `Run /reload-plugins to activate.`,
-corré ese comando. Listo — las skills quedan disponibles en ese
-proyecto (o para tu usuario, según el `--scope` que uses) y Claude Code
-las consulta automáticamente cuando la tarea coincide con la
-`description` de cada módulo.
+If the install summary says `Run /reload-plugins to activate.`, run
+that command. Done — the skill is available in that project (or for
+your user, depending on the `--scope` you use) and Claude Code consults
+it automatically when the task matches its `description`.
 
-### Actualizar a una versión nueva
+### Updating to a new version
 
-Cada vez que hagas push de cambios al repo:
+Whenever you push changes to the repo:
 
 ```
 /plugin marketplace update guardian-asimov-marketplace
 ```
 
-### Instalar para todo tu usuario en vez de un solo proyecto
+### Install for your whole user instead of a single project
 
-Escribí el comando **completo, en una sola línea**, en el prompt de
-Claude Code (no lo escribas dentro del cuadro interactivo de
-"Add Marketplace" que aparece al tipear solo `/plugin marketplace add`
-— ese cuadro espera únicamente la fuente `owner/repo`, sin flags ni el
-segundo comando pegado):
+Type the **full command, on a single line**, in the Claude Code prompt
+(not inside the interactive "Add Marketplace" box that appears when you
+type just `/plugin marketplace add` — that box only expects the
+`owner/repo` source, with no flags or a second pasted command):
 
 ```
-/plugin marketplace add <tu-usuario>/framework-guardian-asimov --scope user
+/plugin marketplace add <your-user>/framework-guardian-asimov --scope user
 ```
 
-Esperá la confirmación, y recién ahí, en su propio Enter:
+Wait for the confirmation, and only then, with its own Enter:
 
 ```
 /plugin install guardian-asimov@guardian-asimov-marketplace
 ```
 
-Con `--scope user` queda disponible en todos tus proyectos de Claude
-Code, no solo en el actual — no hace falta repetir el `marketplace add`
-cada vez que abrís un proyecto nuevo. Para confirmarlo:
+With `--scope user` it is available in all your Claude Code projects,
+not just the current one — no need to repeat `marketplace add` each time
+you open a new project. To confirm:
 
 ```
 /plugin marketplace list --json
 ```
 
-### Que tu equipo lo tenga automáticamente
+### Have your team get it automatically
 
-Si trabajás con otras personas en el mismo repo de proyecto (no el del
-framework, sino el proyecto donde lo usan), agregá esto a
-`.claude/settings.json` del proyecto:
+If you work with other people on the same project repo (not the
+framework's repo, but the project where you use it), add this to the
+project's `.claude/settings.json`:
 
 ```json
 {
@@ -89,7 +86,7 @@ framework, sino el proyecto donde lo usan), agregá esto a
     "guardian-asimov-marketplace": {
       "source": {
         "source": "github",
-        "repo": "<tu-usuario>/framework-guardian-asimov"
+        "repo": "<your-user>/framework-guardian-asimov"
       }
     }
   },
@@ -99,48 +96,47 @@ framework, sino el proyecto donde lo usan), agregá esto a
 }
 ```
 
-Así, cualquiera que abra ese proyecto con Claude Code recibe el
-framework activado automáticamente, sin instalar nada a mano.
+That way, anyone who opens that project with Claude Code gets the
+framework enabled automatically, with nothing installed by hand.
 
-## Opción B — Instalación manual (sin marketplace)
+## Option B — Manual installation (no marketplace)
 
-Si preferís no usar GitHub o el mecanismo de plugins, se puede seguir
-copiando archivos a mano:
+If you prefer not to use GitHub or the plugin mechanism, you can copy
+the skill folder by hand:
 
 ```bash
-git clone https://github.com/<tu-usuario>/framework-guardian-asimov.git
+git clone https://github.com/<your-user>/framework-guardian-asimov.git
 cp -r framework-guardian-asimov/plugins/guardian-asimov/skills/guardian-risk-gate .claude/skills/
 ```
 
-Con esta opción no hay auto-update — cada actualización requiere volver
-a clonar y copiar.
+With this option the skill works, but the technical hook is not
+registered (that is done by the plugin's `hooks/hooks.json`), and there
+is no auto-update — each update requires cloning and copying again.
 
-## Verificar que está activo
+## Verify it is active
 
-Pedile a Claude Code algo levemente riesgoso pero no destructivo, por
-ejemplo: *"Borrá la carpeta `dist/`."* — debería avisar brevemente el
-riesgo (🟡/🔴 según el estado del proyecto) en vez de borrar sin decir
-nada. Si no pasa nada de eso:
+Ask Claude Code for something slightly risky but not destructive, for
+example: *"Delete the `dist/` folder."* — it should briefly flag the
+risk (🟡/🔴 depending on the project state) instead of deleting without
+saying anything. If none of that happens:
 
-- Confirmá que el plugin quedó instalado: `/plugin list` (o revisá
-  `.claude/settings.json` si usaste la Opción B).
-- Corré `claude plugin validate .` desde la raíz del repo del
-  framework para chequear que `marketplace.json` y `plugin.json` estén
-  bien formados.
+- Confirm the plugin is installed: `/plugin list` (or check
+  `.claude/settings.json` if you used Option B).
+- Run `claude plugin validate .` from the framework repo root to check
+  that `marketplace.json` and `plugin.json` are well formed.
 
-Para verificar específicamente **la capa de enforcement técnico** (el
-hook, no solo la skill), corré `/hooks` dentro de Claude Code — debería
-listar un `PreToolUse` con matcher `Bash|PowerShell` proveniente de
-"Plugin Hooks". Como prueba real, pedile algo como *"borrá esta carpeta
-con `rm -rf`"* sobre una carpeta de prueba: debería aparecer un pedido
-de permiso real (no solo texto), incluso si en algún momento el modelo
-intentara saltearlo.
+To verify **the technical enforcement layer** specifically (the hook,
+not just the skill), run `/hooks` inside Claude Code — it should list a
+`PreToolUse` with matcher `Bash|PowerShell` coming from "Plugin Hooks".
+As a real test, ask for something like *"delete this folder with
+`rm -rf`"* on a test folder: a real permission request should appear
+(not just text), even if the model at some point tried to skip it.
 
-## Desinstalar / remover el marketplace
+## Uninstall / remove the marketplace
 
 ```
 /plugin marketplace remove guardian-asimov-marketplace
 ```
 
-Esto también desinstala el plugin. Para solo refrescar sin perder la
-instalación, usá `update` en vez de `remove`.
+This also uninstalls the plugin. To just refresh without losing the
+installation, use `update` instead of `remove`.

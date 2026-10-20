@@ -1,51 +1,52 @@
-# Database — riesgo sobre datos persistentes
+# Database — risk on persistent data
 
-## Checklist previa
+## Pre-check
 
-- ¿La operación es de **lectura pura** (`SELECT`) o **modifica** datos
+- Is the operation **read-only** (`SELECT`) or does it **modify** data
   (`INSERT`/`UPDATE`/`DELETE`/DDL)?
-- ¿Corre contra una base de **desarrollo/staging** o **producción**?
-- ¿El `UPDATE`/`DELETE` tiene un `WHERE` acotado y verificado, o puede
-  afectar más filas de las esperadas?
-- ¿Existe un **backup reciente** antes de una operación destructiva?
-- ¿La migración es **reversible** (tiene `down`) o irreversible (dropea
-  columnas/tablas con datos)?
-- ¿Hay **transacción** disponible para poder hacer rollback si algo sale
-  mal?
+- Does it run against a **development/staging** database or **production**?
+- Does the `UPDATE`/`DELETE` have a narrow, verified `WHERE`, or can it
+  affect more rows than expected?
+- Is there a **recent backup** before a destructive operation?
+- Is the migration **reversible** (has a `down`) or irreversible (drops
+  columns/tables that hold data)?
+- Is a **transaction** available so it can be rolled back if something
+  goes wrong?
 
-## Clasificación rápida
+## Quick classification
 
-- 🟢 `SELECT`, `EXPLAIN`, consultas de solo lectura, migraciones aditivas
-  reversibles en un entorno de desarrollo local.
-- 🟡 `UPDATE`/`DELETE` acotados con `WHERE` verificado en desarrollo;
-  migraciones aditivas en staging/producción con `down` disponible.
-- 🔴 `UPDATE`/`DELETE` en producción; migraciones que alteran tipos o
-  renombran columnas con datos existentes; operaciones sin transacción
-  en datos que importan.
-- ⚫ `DROP DATABASE`, `DROP TABLE`, `TRUNCATE`, `DELETE` sin `WHERE` (o
-  con `WHERE` que cubre todo), migraciones destructivas en producción,
-  cualquier operación irreversible sin backup confirmado.
+- 🟢 `SELECT`, `EXPLAIN`, read-only queries, reversible additive
+  migrations in a local development environment.
+- 🟡 Narrow `UPDATE`/`DELETE` with a verified `WHERE` in development;
+  additive migrations in staging/production with a `down` available.
+- 🔴 `UPDATE`/`DELETE` in production; migrations that change types or
+  rename columns with existing data; operations without a transaction
+  on data that matters.
+- ⚫ `DROP DATABASE`, `DROP TABLE`, `TRUNCATE`, `DELETE` without `WHERE`
+  (or with a `WHERE` that covers everything), destructive migrations in
+  production, any irreversible operation without a confirmed backup.
 
-## Reglas específicas
+## Specific rules
 
-1. **Nunca ejecutar DDL/DML destructivo directo en producción** sin
-   backup confirmado y confirmación explícita del usuario, sin
-   excepción de perfil.
-2. **Preferir simular antes de ejecutar**: correr el `SELECT` equivalente
-   al `WHERE` de un `UPDATE`/`DELETE` primero, para mostrar cuántas filas
-   se van a afectar, antes de correr la versión destructiva.
-3. **Preferir transacciones** cuando el motor las soporta, para poder
-   hacer `ROLLBACK` si el resultado no es el esperado.
-4. **Migraciones**: siempre preferir un cambio aditivo (agregar columna
-   nullable) sobre uno destructivo (dropear/renombrar) cuando el
-   objetivo final se puede lograr en dos pasos seguros.
-5. **Nunca asumir que "dev" significa "sin importancia"** — si el usuario
-   no aclaró el entorno, preguntar antes de correr algo destructivo.
+1. **Never run destructive DDL/DML directly on production** without a
+   confirmed backup and explicit user confirmation, with no profile
+   exception.
+2. **Prefer simulating before executing**: run the `SELECT` equivalent
+   of an `UPDATE`/`DELETE`'s `WHERE` first, to show how many rows will
+   be affected, before running the destructive version.
+3. **Prefer transactions** when the engine supports them, so you can
+   `ROLLBACK` if the result is not what was expected.
+4. **Migrations**: always prefer an additive change (add a nullable
+   column) over a destructive one (drop/rename) when the end goal can
+   be reached in two safe steps.
+5. **Never assume "dev" means "unimportant"** — if the user did not
+   specify the environment, ask before running anything destructive.
 
-## Ejemplo de intervención
+## Example intervention
 
-> Usuario: "Borrá los usuarios inactivos de la tabla `users`."
-> Framework: ⚫ Crítico — un `DELETE` sobre `users` es irreversible si no
-> hay backup. Antes de borrar: (1) ¿tenés backup reciente de esta base?
-> (2) te muestro primero cuántas filas matchean "inactivo" con un
-> `SELECT COUNT(*)` antes de borrar nada. ¿Seguimos así?
+> User: "Delete the inactive users from the `users` table."
+> Framework: ⚫ Critical — a `DELETE` on `users` is irreversible if
+> there is no backup. Before deleting: (1) do you have a recent backup
+> of this database? (2) I'll first show you how many rows match
+> "inactive" with a `SELECT COUNT(*)` before deleting anything. Shall
+> we go that way?

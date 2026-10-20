@@ -33,8 +33,14 @@ de darlo por bueno:
 ## 2. Onboarding — entender el framework rápido
 
 Si sos nuevo en el proyecto (o volvés después de un tiempo), leer estos
-12 casos de punta a punta da una idea concreta de cómo se aplica la
+14 casos de punta a punta da una idea concreta de cómo se aplica la
 constitución en la práctica, más rápido que leer solo los `SKILL.md`.
+
+## 3. Corpus del hook (automático)
+
+`bash tests/run-hook-corpus.sh` corre `tests/hook-corpus.txt` contra
+`scripts/guardian-gate.sh` (solo texto, no ejecuta nada) y falla si
+algún caso cambia de resultado. Sirve como regresión al tocar el hook.
 
 ## Cobertura actual
 

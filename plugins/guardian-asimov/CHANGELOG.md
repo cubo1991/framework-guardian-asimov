@@ -3,6 +3,36 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/).
 Versionado semántico.
 
+## [1.3.1] - 2026-10-20
+
+### Corregido
+- **El hook no arrancaba en instalaciones vía marketplace**:
+  `guardian-gate.sh` estaba en git como 100644 (sin bit de ejecución),
+  Claude Code lo invocaba directo y fallaba con "Permission denied"; como
+  ese error no bloquea, los comandos pasaban sin revisión. Ahora
+  `hooks.json` lo invoca con `bash "${CLAUDE_PLUGIN_ROOT}/scripts/guardian-gate.sh"`,
+  el script quedó en 100755 y se agregó `"onFailure": "block"` (Claude
+  Code v2.1.295+) para que un fallo del hook no deje pasar el comando.
+- Sin `jq` el hook ya no deja pasar todo en silencio: pide confirmación.
+- `rm` recursivo+forzado se detecta en cualquier forma y orden (`-fr`,
+  `-r -f`, `--recursive --force`, `/bin/rm`).
+- `DELETE FROM ... WHERE ...` ya no dispara la confirmación (alineado con
+  la lista de operaciones críticas: solo `DELETE` sin `WHERE`).
+- Nuevos patrones: `git push ... +ref`, `DROP SCHEMA/TABLE`,
+  `curl|wget ... | sh/python/node/perl/ruby`, `chmod 0777`.
+
+### Agregado
+- `tests/hook-corpus.txt` + `tests/run-hook-corpus.sh`: corpus de
+  regresión (solo alimenta texto al hook, no ejecuta nada), con
+  limitaciones conocidas documentadas como `LIMITE-FN` / `LIMITE-FP`.
+- `scripts/guardian-doctor.sh`: autodiagnóstico del hook.
+
+### Cambiado
+- Documentación ajustada para no sobreprometer: el hook es una red
+  parcial basada en patrones de texto, no una garantía (ver
+  `constitution.md` sección 0, `skills/risk-analysis/SKILL.md`,
+  escenario 14).
+
 ## [1.3.0] - 2026-08-07
 
 ### Agregado

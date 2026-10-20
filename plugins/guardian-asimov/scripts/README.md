@@ -12,27 +12,36 @@ los mismos patrones de "Operaciones críticas" descriptos en
 `git push --force`, `DROP DATABASE`, `TRUNCATE`, `sudo rm`,
 `curl | bash`, `chmod -R 777`, etc.). Si coincide, devuelve
 `permissionDecision: "ask"` — lo que dispara el diálogo de permisos
-real de Claude Code, no una simple sugerencia de texto.
+real de Claude Code, no una simple sugerencia de texto. El hook se
+invoca con `bash` (no depende del bit de ejecución) y tiene
+`onFailure: "block"`: si el hook falla, el comando se bloquea en vez de
+pasar.
 
 Efecto según el modo:
 
 - **Sesión interactiva**: el usuario ve el pedido de permiso y decide
   — igual que cualquier otra confirmación de Claude Code, pero
-  garantizada por este hook incluso si el modelo "se olvidó" de
-  preguntar.
+  forzada por este hook cuando el comando coincide, incluso si el
+  modelo "se olvidó" de preguntar.
 - **Modo no interactivo (`-p`, sin humano disponible)**: al no haber
-  quién responda esa confirmación, la acción queda bloqueada por
-  default. Ver `tests/scenarios/14-headless-mode-enforcement.md`.
+  quién responda esa confirmación, la acción queda sin ejecutar. Ver `tests/scenarios/14-headless-mode-enforcement.md`.
 
 ## Requisitos
 
 - `bash` y `jq` deben estar disponibles en el entorno donde corre
-  Claude Code. Si `jq` no está instalado, el script falla en modo
-  seguro (no bloquea nada — deja el flujo normal de permisos, no
-  "cierra" la terminal), pero en ese caso perdés la capa de
-  enforcement técnico y solo queda la capa de razonamiento
-  (`risk-analysis`). Instalar `jq`: `apt install jq` /
+  Claude Code. Si `jq` no está instalado, el script
+  falla cerrado: devuelve `ask` para todo comando (v1.3.1; antes
+  dejaba pasar todo en silencio). Instalar `jq`: `apt install jq` /
   `brew install jq` / `choco install jq`, según tu sistema.
+
+## Verificar que funciona
+
+- `bash scripts/guardian-doctor.sh` — autodiagnóstico: dependencias,
+  `hooks.json`, `onFailure`, y que un comando crítico de prueba dispare
+  la confirmación (no ejecuta nada).
+- `bash tests/run-hook-corpus.sh` — corpus de regresión
+  (`tests/hook-corpus.txt`): qué se detecta, qué no (`LIMITE-FN`) y qué
+  da falsos positivos (`LIMITE-FP`). Solo alimenta texto al hook.
 
 ## Mantener el patrón sincronizado
 
@@ -54,5 +63,8 @@ ellas.
 - Los patrones son heurísticos (regex), no un parser real de shell —
   pueden dar falsos positivos (piden confirmación de más, sin
   problema) pero, más importante, en teoría también falsos negativos
-  ante un comando muy ofuscado. No reemplaza el buen juicio, es una
-  red de seguridad adicional.
+  ante cualquier comando por indirección (`eval`, variables,
+  `python -c`) o no listado (`find -delete`, `terraform destroy`,
+  `kubectl delete`, `docker system prune`, etc.; ver el corpus). No
+  reemplaza el buen juicio, es una red de seguridad adicional.
+- Verificado en Linux. Windows (Git Bash) y macOS sin probar.

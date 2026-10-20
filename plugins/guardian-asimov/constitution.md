@@ -25,21 +25,27 @@ que se ejecuta.
 **Capa de enforcement técnico (hook).** Para la lista cerrada de
 "Operaciones críticas" (ver `skills/risk-analysis/SKILL.md`) —
 irreversibles por definición: `rm -rf`, `git push --force`,
-`DROP DATABASE`, etc. — el framework **sí** aplica una regla rígida,
-pero fuera del modelo: un hook `PreToolUse` (`hooks/hooks.json` +
-`scripts/guardian-gate.sh`) que Claude Code ejecuta automáticamente
-antes de correr cualquier comando de shell, y que fuerza una
-confirmación real a través del propio sistema de permisos —
-independientemente de lo que el modelo haya decidido. Esta capa no
-depende de que el modelo coopere: corre siempre, y en modo desatendido
-sin nadie para confirmar, la acción queda bloqueada por default en vez
-de ejecutarse.
+`DROP DATABASE`, etc. — el framework agrega una regla rígida fuera del
+modelo: un hook `PreToolUse` (`hooks/hooks.json` +
+`scripts/guardian-gate.sh`) que Claude Code ejecuta antes de cada
+comando de shell y que, si el texto del comando coincide con uno de sus
+patrones, pide confirmación a través del propio sistema de permisos,
+independientemente de lo que el modelo haya decidido. No depende de que
+el modelo coopere, y en modo desatendido sin nadie para confirmar la
+acción queda sin ejecutar.
+
+Es una red parcial: son patrones sobre texto, no un parser de shell. No
+detecta comandos construidos por indirección (`eval`, variables,
+`python -c`), ni todas las operaciones destructivas posibles, y puede
+marcar comandos inocuos que solo mencionan un patrón. El detalle está en
+`scripts/README.md` y en `tests/hook-corpus.txt`. Si el hook no puede
+arrancar (p. ej. falta `jq`), el comportamiento es pedir confirmación o
+bloquear, no dejar pasar; `scripts/guardian-doctor.sh` lo verifica.
 
 En resumen: el razonamiento decide *cómo responder* ante la mayoría de
-los riesgos (Medio, Alto, y Crítico fuera de la lista cerrada); el hook
-garantiza *que no se ejecute sin confirmación real* la lista acotada de
-operaciones que nunca deberían correr sin un humano presente,
-pase lo que pase con el juicio del modelo en ese momento.
+los riesgos (Medio, Alto, y Crítico); el hook agrega un freno técnico
+para los patrones de la lista que sabe reconocer. Lo que el hook no ve
+depende solo del juicio del modelo.
 
 No existe para frenar el trabajo. Existe para que las acciones
 irreversibles, costosas o inseguras nunca ocurran por default o por

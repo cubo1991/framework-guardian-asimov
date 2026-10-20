@@ -90,10 +90,27 @@ Por eso, para la lista cerrada de "operaciones críticas" (`rm -rf`,
 `git push --force`, `DROP DATABASE`, etc.), el framework agrega una
 segunda capa: un **hook técnico** (`hooks/hooks.json` +
 `scripts/guardian-gate.sh`) que Claude Code ejecuta automáticamente
-antes de correr cualquier comando de shell, y que fuerza una
-confirmación real a través del sistema de permisos — sin depender de
-que el modelo coopere. En modo desatendido, sin nadie para confirmar,
-la acción queda bloqueada por default.
+antes de correr cada comando de shell, y que pide confirmación a través
+del sistema de permisos cuando el texto del comando coincide con uno de
+sus patrones — sin depender de que el modelo coopere. En modo
+desatendido, sin nadie para confirmar, la acción queda sin ejecutar.
+
+### Qué NO hace el hook
+
+Es una red de seguridad parcial, no una garantía:
+
+- Son patrones regex sobre el texto del comando, no un parser de shell.
+- No ve indirección: `eval`, variables, `python -c`, scripts descargados.
+- No cubre toda la lista de operaciones críticas (p. ej. `find -delete`,
+  `git checkout -- .`, `terraform destroy`, `kubectl delete`, tocar
+  `.env` o backups) ni acciones hechas por otras herramientas (MCP, edición de archivos).
+- Puede marcar comandos inocuos que solo mencionan un patrón (un
+  mensaje de commit, un `grep`).
+- Probado en Linux; Windows y macOS sin verificar.
+
+La lista medida de lo que detecta y lo que no está en
+`plugins/guardian-asimov/tests/hook-corpus.txt` (se corre con
+`bash plugins/guardian-asimov/tests/run-hook-corpus.sh`).
 
 Ver `constitution.md` (sección 0) para el detalle de esta distinción.
 

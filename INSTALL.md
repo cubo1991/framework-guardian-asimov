@@ -1,30 +1,10 @@
 # Instalación
 
-## Paso 0 — Subir el repo a GitHub
-
-Este framework ya está estructurado como un marketplace de Claude Code
-(`.claude-plugin/marketplace.json` en la raíz + el plugin en
-`plugins/guardian-asimov/`). Solo falta subirlo:
-
-```bash
-cd framework-guardian-asimov
-git init
-git add .
-git commit -m "Framework Guardian Asimov v1.0.0"
-git remote add origin https://github.com/<tu-usuario>/framework-guardian-asimov.git
-git push -u origin main
-```
-
-Puede ser un repo público o privado — ambos funcionan con
-`/plugin marketplace add`.
-
 ## Requisito: `jq`
 
 A partir de v1.3.0 el framework incluye un hook técnico
-(`hooks/hooks.json` + `scripts/guardian-gate.sh`) que necesita `jq`
-disponible en el entorno donde corre Claude Code, para bloquear de
-verdad las operaciones críticas (no solo avisar por texto). Si no lo
-tenés:
+(`hooks/hooks.json` + `scripts/guardian-gate.sh`) que necesita `bash` y
+`jq` en el entorno donde corre Claude Code. Si no lo tenés:
 
 ```bash
 # macOS
@@ -35,9 +15,17 @@ sudo apt install jq
 choco install jq
 ```
 
-Si `jq` no está instalado, el framework sigue funcionando igual a nivel
-de razonamiento (las skills avisan como siempre), pero pierde la capa
-de enforcement técnico — ver `plugins/guardian-asimov/scripts/README.md`.
+Si `jq` no está instalado, el hook (desde v1.3.1) pide confirmación para
+**todos** los comandos de shell, para no dejar pasar nada en silencio.
+Después de instalar, verificá que el hook arranca:
+
+```bash
+bash plugins/guardian-asimov/scripts/guardian-doctor.sh
+```
+
+(Si instalaste vía marketplace, el plugin queda en
+`~/.claude/plugins/`; corré el mismo script desde esa ruta.) Más
+detalle en `plugins/guardian-asimov/scripts/README.md`.
 
 ## Opción A — Instalar como plugin (recomendada)
 
